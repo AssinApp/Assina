@@ -16,6 +16,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     marginBottom: 20,
+    fontWeight: 'bold',
+    color: colors.darkPurple,
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 40,
+    textAlign: 'center',
+    color: colors.darkGray,
   },
   buttonTitle: {
     fontSize: 16,
@@ -36,20 +44,25 @@ export default function Home({ navigation }: StackProps) {
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" />
-      <Text style={styles.title}>Assinatura Digital</Text>
+      <Text style={styles.title}>Bem-vindo ao AssinApp</Text>
+      <Text style={styles.subtitle}>
+        Assine documentos de forma segura e prática com autenticação de dois fatores.
+      </Text>
+
+      {/* Botão de Login */}
       <Button
-        title="Autenticação 2 fatores"
+        title="Login"
         titleStyle={styles.buttonTitle}
         style={styles.button}
-        onPress={() => navigation.navigate('GerarCodigoStack', { from: 'Home' })}
+        onPress={() => navigation.navigate('LoginStack', { from: 'Home' })}
       />
 
-      {/* Botão para Assinatura */}
+      {/* Botão de Cadastro */}
       <Button
-        title="Assine"
+        title="Cadastre-se"
         titleStyle={styles.buttonTitle}
         style={[styles.button, { marginTop: 16 }]}
-        onPress={() => navigation.navigate('AssinaturaStack', { from: 'Home' })}
+        onPress={() => navigation.navigate('CadastroStack', { from: 'Home' })}
       />
     </View>
   );

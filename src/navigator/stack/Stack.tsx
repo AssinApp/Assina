@@ -2,9 +2,11 @@ import { StackHeaderLeft, StackHeaderTitle } from './components';
 import { StackParamList, StackProps } from './Stack.typeDefs';
 
 import Assinatura from '@/views/Assinatura';
+import Cadastro from '@/views/Cadastro';
 import Details from '@/views/GerarCodigo';
 import { DrawerActions } from '@react-navigation/native';
 import Home from '@/views/Home';
+import Login from '@/views/Login';
 import Profile from '@/views/Profile';
 import React from 'react';
 import { colors } from '@/theme';
@@ -49,6 +51,10 @@ export function HomeStackNavigator({ navigation }: StackProps) {
         component={Assinatura}
         options={{ title: 'Assinatura' }}
       />
+
+      <Stack.Screen name="CadastroStack" component={Cadastro} options={{ title: 'Cadastro' }} />
+
+      <Stack.Screen name="LoginStack" component={Login} options={{ title: 'Login' }} />
     </Stack.Navigator>
   );
 }

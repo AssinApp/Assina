@@ -5,6 +5,8 @@ export type StackParamList = {
   GerarCodigoStack: { from: string };
   ProfileStack: undefined;
   AssinaturaStack: { from: string };
+  LoginStack: { from: string };
+  CadastroStack: { from: string };
   // add more screen props...
 };
 
