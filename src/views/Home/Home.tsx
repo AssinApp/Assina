@@ -41,7 +41,7 @@ export default function Home({ navigation }: StackProps) {
         title="Autenticação 2 fatores"
         titleStyle={styles.buttonTitle}
         style={styles.button}
-        onPress={() => navigation.navigate('DetailsStack', { from: 'Home' })}
+        onPress={() => navigation.navigate('GerarCodigoStack', { from: 'Home' })}
       />
 
       {/* Botão para Assinatura */}

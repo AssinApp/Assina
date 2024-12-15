@@ -2,7 +2,7 @@ import { StackHeaderLeft, StackHeaderTitle } from './components';
 import { StackParamList, StackProps } from './Stack.typeDefs';
 
 import Assinatura from '@/views/Assinatura';
-import Details from '@/views/Details';
+import Details from '@/views/GerarCodigo';
 import { DrawerActions } from '@react-navigation/native';
 import Home from '@/views/Home';
 import Profile from '@/views/Profile';
@@ -36,7 +36,7 @@ export function HomeStackNavigator({ navigation }: StackProps) {
       />
       <Stack.Screen
         component={Details}
-        name="DetailsStack"
+        name="GerarCodigoStack"
         options={{
           title: 'Details',
           headerTitle: () => <StackHeaderTitle />,
@@ -69,7 +69,7 @@ export function ProfileStackNavigator({ navigation }: StackProps) {
       />
       <Stack.Screen
         component={Details}
-        name="DetailsStack"
+        name="GerarCodigoStack"
         options={{
           title: 'Details',
           headerTitle: () => <StackHeaderTitle />,
