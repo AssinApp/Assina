@@ -6,13 +6,12 @@ import Cadastro from '@/views/Cadastro';
 import Details from '@/views/GerarCodigo';
 import { DrawerActions } from '@react-navigation/native';
 import Home from '@/views/Home';
+import HomeAuth from '@/views/HomeAuth';
 import Login from '@/views/Login';
 import Profile from '@/views/Profile';
 import React from 'react';
 import { colors } from '@/theme';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-// views
 
 const Stack = createNativeStackNavigator<StackParamList>();
 
@@ -22,23 +21,32 @@ const navigationProps = {
   headerTitleStyle: { fontSize: 18 },
 };
 
-export function HomeStackNavigator({ navigation }: StackProps) {
-  const toggleDrawer = () => navigation.dispatch(DrawerActions.toggleDrawer());
+export function HomeStackNavigator({ route }: StackProps) {
+  const initialRoute = route?.params?.isLoggedIn ? 'HomeAuth' : 'HomeStack';
+
   return (
-    <Stack.Navigator screenOptions={navigationProps}>
+    <Stack.Navigator initialRouteName={initialRoute} screenOptions={navigationProps}>
       <Stack.Screen
-        component={Home}
         name="HomeStack"
+        component={Home}
         options={{
           title: 'Home',
-          headerTitle: () => <StackHeaderTitle />,
-          headerLeft: () => <StackHeaderLeft onPress={toggleDrawer} />,
           headerTitleAlign: 'center',
         }}
       />
+
       <Stack.Screen
-        component={Details}
+        name="HomeAuth"
+        component={HomeAuth}
+        options={{
+          title: 'Home Autenticada',
+          headerTitleAlign: 'center',
+        }}
+      />
+
+      <Stack.Screen
         name="GerarCodigoStack"
+        component={Details}
         options={{
           title: 'Details',
           headerTitle: () => <StackHeaderTitle />,
@@ -64,8 +72,8 @@ export function ProfileStackNavigator({ navigation }: StackProps) {
   return (
     <Stack.Navigator screenOptions={navigationProps}>
       <Stack.Screen
-        component={Profile}
         name="ProfileStack"
+        component={Profile}
         options={{
           title: 'Profile',
           headerTitle: () => <StackHeaderTitle />,
@@ -74,8 +82,8 @@ export function ProfileStackNavigator({ navigation }: StackProps) {
         }}
       />
       <Stack.Screen
-        component={Details}
         name="GerarCodigoStack"
+        component={Details}
         options={{
           title: 'Details',
           headerTitle: () => <StackHeaderTitle />,

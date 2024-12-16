@@ -1,9 +1,48 @@
-import { StatusBar, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect } from 'react';
 
 import Button from '@/components/Button';
-import React from 'react';
 import { StackProps } from '@/navigator/stack';
 import { colors } from '@/theme';
+
+// Simule um estado global de login (pode ser substituído por Context API ou AsyncStorage)
+const isLoggedIn = false; // Defina como true para simular um usuário logado
+
+export default function Home({ navigation }: StackProps) {
+  useEffect(() => {
+    // Verifica se o usuário está logado
+    if (isLoggedIn) {
+      // Redireciona para HomeLogada
+      navigation.replace('HomeLogged');
+    }
+  }, []);
+
+  return (
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" />
+      <Text style={styles.title}>Bem-vindo ao AssinApp</Text>
+      <Text style={styles.subtitle}>
+        Assine documentos de forma segura e prática com autenticação de dois fatores.
+      </Text>
+
+      {/* Botão de Login */}
+      <Button
+        title="Login"
+        titleStyle={styles.buttonTitle}
+        style={styles.button}
+        onPress={() => navigation.navigate('LoginStack')}
+      />
+
+      {/* Botão de Cadastro */}
+      <Button
+        title="Cadastre-se"
+        titleStyle={styles.buttonTitle}
+        style={[styles.button, { marginTop: 16 }]}
+        onPress={() => navigation.navigate('CadastroStack')}
+      />
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   root: {
@@ -12,9 +51,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.lightGrayPurple,
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     marginBottom: 20,
     fontWeight: 'bold',
     color: colors.darkPurple,
@@ -31,39 +71,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    paddingVertical: 8,
+    paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 22,
     backgroundColor: colors.lightPurple,
     height: 44,
-    width: '50%',
+    width: '70%',
   },
 });
-
-export default function Home({ navigation }: StackProps) {
-  return (
-    <View style={styles.root}>
-      <StatusBar barStyle="light-content" />
-      <Text style={styles.title}>Bem-vindo ao AssinApp</Text>
-      <Text style={styles.subtitle}>
-        Assine documentos de forma segura e prática com autenticação de dois fatores.
-      </Text>
-
-      {/* Botão de Login */}
-      <Button
-        title="Login"
-        titleStyle={styles.buttonTitle}
-        style={styles.button}
-        onPress={() => navigation.navigate('LoginStack', { from: 'Home' })}
-      />
-
-      {/* Botão de Cadastro */}
-      <Button
-        title="Cadastre-se"
-        titleStyle={styles.buttonTitle}
-        style={[styles.button, { marginTop: 16 }]}
-        onPress={() => navigation.navigate('CadastroStack', { from: 'Home' })}
-      />
-    </View>
-  );
-}

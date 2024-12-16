@@ -2,6 +2,8 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 
 export type StackParamList = {
   HomeStack: undefined;
+  HomeLogged: undefined;
+  HomeAuthStack: undefined;
   GerarCodigoStack: { from: string };
   ProfileStack: undefined;
   AssinaturaStack: { from: string };

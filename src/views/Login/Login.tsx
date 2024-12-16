@@ -14,9 +14,8 @@ export default function Login({ navigation }: StackProps) {
       return;
     }
 
-    // Simulação de autenticação
-    console.log('Login com:', { email, password });
-    navigation.navigate('GerarCodigo'); // Navega para a tela OTP
+    console.log('[##] loggedIn true');
+    navigation.navigate('HomeTab', { screen: 'HomeAuth', params: { isLoggedIn: true } });
   };
 
   return (

@@ -1,11 +1,15 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { AntDesign } from '@expo/vector-icons';
-import { colors } from '@/theme';
-import { TabParamList, TabBarStatus } from './Tab.typeDefs';
 import { HomeStackNavigator, ProfileStackNavigator } from '../stack/Stack';
+import { TabBarStatus, TabParamList } from './Tab.typeDefs';
+
+import { AntDesign } from '@expo/vector-icons';
+import React from 'react';
+import { colors } from '@/theme';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator<TabParamList>();
+
+const hiddenRoutes = ['LoginStack', 'CadastroStack', 'HomeStack'];
 
 const renderTabBarIcon = (tabName: keyof TabParamList) => (tabStatus: TabBarStatus) => {
   switch (tabName) {
@@ -13,9 +17,13 @@ const renderTabBarIcon = (tabName: keyof TabParamList) => (tabStatus: TabBarStat
       return <AntDesign name="home" size={24} color={tabStatus.color} />;
     case 'ProfileTab':
       return <AntDesign name="profile" size={24} color={tabStatus.color} />;
-    // add more...
   }
 };
+
+function shouldHideTabBar(route: any) {
+  const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+  return hiddenRoutes.includes(routeName);
+}
 
 export default function TabNavigator() {
   return (
@@ -27,8 +35,23 @@ export default function TabNavigator() {
         tabBarInactiveBackgroundColor: colors.white,
         tabBarActiveTintColor: colors.lightPurple,
         tabBarActiveBackgroundColor: colors.white,
+        tabBarStyle: {
+          display: shouldHideTabBar(route) ? 'none' : 'flex',
+        },
       })}>
-      <Tab.Screen name="HomeTab" component={HomeStackNavigator} options={{ title: 'Home' }} />
+      <Tab.Screen
+        name="HomeTab"
+        component={HomeStackNavigator}
+        options={{
+          title: 'Home',
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: e => {
+            e.preventDefault(); // Previne o comportamento padrão
+            navigation.navigate('HomeTab', { screen: 'HomeAuth' }); // Sempre navega para HomeAuth
+          },
+        })}
+      />
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStackNavigator}

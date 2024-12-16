@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
-import { View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
-import { useAppSlice, useAppService, IUser } from '@/modules/app';
+
+import { DataPersistKeys, useDataPersist } from '@/hooks';
+import { IUser, useAppService, useAppSlice } from '@/modules/app';
+import { loadFonts, loadImages } from '@/theme';
+import { useEffect, useState } from 'react';
+
 import BottomSheet from '@/components/BottomSheet';
-import { WelcomeBottomSheetContents } from '@/layouts/BottomSheetContents';
 import DrawerNavigator from './drawer';
-import { loadImages, loadFonts } from '@/theme';
-import { useDataPersist, DataPersistKeys } from '@/hooks';
+import { NavigationContainer } from '@react-navigation/native';
+import { View } from 'react-native';
+import { WelcomeBottomSheetContents } from '@/layouts/BottomSheetContents';
 import { isWeb } from '@/utils/deviceInfo';
 
 // keep the splash screen visible while complete fetching resources
