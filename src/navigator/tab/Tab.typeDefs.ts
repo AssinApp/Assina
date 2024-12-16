@@ -7,7 +7,7 @@ export type TabBarStatus = {
 };
 
 export type TabParamList = {
-  HomeTab: undefined;
+  HomeTab: { screen: string; params?: { isLoggedIn?: boolean } }; // Atualizado
   ProfileTab: undefined;
   // add more tab params...
 };

@@ -24,7 +24,7 @@ export default function Cadastro({ navigation }: StackProps) {
     // Simulação de cadastro
     console.log('Cadastro com:', { name, email, password });
     ToastAndroid.show('Conta criada com sucesso!', ToastAndroid.SHORT);
-    navigation.navigate('Login'); // Redireciona para Login
+    navigation.navigate('Login', { from: 'HomeStack' }); // Redireciona para Login
   };
 
   return (

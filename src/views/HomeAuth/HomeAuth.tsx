@@ -2,6 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import React from 'react';
 import { StackProps } from '@/navigator/stack';
+import { ToastAndroid } from 'react-native';
 import { colors } from '@/theme';
 
 export default function HomeAuth({ navigation }: StackProps) {

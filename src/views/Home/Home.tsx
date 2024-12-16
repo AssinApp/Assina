@@ -30,7 +30,7 @@ export default function Home({ navigation }: StackProps) {
         title="Login"
         titleStyle={styles.buttonTitle}
         style={styles.button}
-        onPress={() => navigation.navigate('LoginStack')}
+        onPress={() => navigation.navigate('LoginStack', { from: 'HomeStack' })}
       />
 
       {/* Botão de Cadastro */}
@@ -38,7 +38,7 @@ export default function Home({ navigation }: StackProps) {
         title="Cadastre-se"
         titleStyle={styles.buttonTitle}
         style={[styles.button, { marginTop: 16 }]}
-        onPress={() => navigation.navigate('CadastroStack')}
+        onPress={() => navigation.navigate('CadastroStack', { from: 'HomeStack' })}
       />
     </View>
   );
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 40,
     textAlign: 'center',
-    color: colors.darkGray,
+    color: colors.darkPurple,
   },
   buttonTitle: {
     fontSize: 16,
