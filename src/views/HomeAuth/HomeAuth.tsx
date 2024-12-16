@@ -1,21 +1,25 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import React from 'react';
-import { StackProps } from '@/navigator/stack';
-import { ToastAndroid } from 'react-native';
-import { colors } from '@/theme';
+import { useNavigation } from '@react-navigation/native';
 
-export default function HomeAuth({ navigation }: StackProps) {
+export default function HomeAuth() {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
+      {/* Conteúdo principal da tela */}
       <Text style={styles.title}>Bem-vindo à Home Autenticada</Text>
       <Text style={styles.subtitle}>
-        Você está autenticado. A TabBar e o Drawer agora estão visíveis.
+        Você está autenticado. Aproveite as funcionalidades disponíveis.
       </Text>
+
+      {/* Botão Flutuante */}
       <TouchableOpacity
-        style={styles.button}
-        onPress={() => ToastAndroid.show('HomeAuth ativa!', ToastAndroid.SHORT)}>
-        <Text style={styles.buttonText}>Explorar</Text>
+        style={styles.fab}
+        onPress={() => navigation.navigate('AssinaturaStack', { from: HomeAuth })} // Redireciona para a tela Assinatura
+      >
+        <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
     </View>
   );
@@ -26,31 +30,40 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.lightGrayPurple,
-    paddingHorizontal: 20,
+    backgroundColor: '#f5f5f5', // Cor de fundo
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.darkPurple,
+    color: '#333', // Cor do título
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
-    color: colors.gray,
-    marginBottom: 24,
+    color: '#666', // Cor do subtítulo
+    marginBottom: 32,
   },
-  button: {
-    backgroundColor: colors.lightPurple,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
+  fab: {
+    position: 'absolute',
+    right: 20, // Distância do lado direito
+    bottom: 20, // Distância da parte inferior
+    width: 60, // Largura do botão
+    height: 60, // Altura do botão
+    borderRadius: 30, // Torna o botão circular
+    backgroundColor: '#1e90ff', // Cor do botão
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5, // Sombra para Android
+    shadowColor: '#000', // Cor da sombra para iOS
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.5,
   },
-  buttonText: {
-    fontSize: 16,
-    color: colors.white,
+  fabIcon: {
+    fontSize: 28,
+    color: '#fff', // Cor do texto no botão
     fontWeight: 'bold',
   },
 });
