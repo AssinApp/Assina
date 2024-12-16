@@ -21,7 +21,9 @@ const navigationProps = {
   headerTitleStyle: { fontSize: 18 },
 };
 
-export function HomeStackNavigator({ route }: StackProps) {
+export function HomeStackNavigator({ navigation, route }: StackProps) {
+  const toggleDrawer = () => navigation.dispatch(DrawerActions.toggleDrawer()); // Adicione a função aqui
+
   const initialRoute = route?.params?.isLoggedIn ? 'HomeAuth' : 'HomeStack';
 
   return (
@@ -41,6 +43,7 @@ export function HomeStackNavigator({ route }: StackProps) {
         options={{
           title: 'Home Autenticada',
           headerTitleAlign: 'center',
+          headerLeft: () => <StackHeaderLeft onPress={toggleDrawer} />, // Botão do Drawer
         }}
       />
 
