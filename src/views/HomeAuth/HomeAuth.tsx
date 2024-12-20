@@ -1,11 +1,12 @@
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 export default function HomeAuth() {
   const [userName, setUserName] = useState('');
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -15,15 +16,31 @@ export default function HomeAuth() {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
-        if (response.ok) setUserName(data.email);
+        if (response.ok) setUserName(data.name);
       }
     };
     fetchUser();
   }, []);
 
+  const handleLogout = async () => {
+    Alert.alert('Sair', 'Tem certeza que deseja sair?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Sair',
+        onPress: async () => {
+          await AsyncStorage.removeItem('token'); // Remove o token
+          navigation.navigate('LoginStack', { from: 'HomeStack' }); // Redireciona para a tela de login
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bem-vindo, {userName}</Text>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Sair</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -63,6 +80,19 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.5,
+  },
+
+  logoutButton: {
+    marginTop: 20,
+    backgroundColor: '#ff4d4d',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
   fabIcon: {
     fontSize: 28,

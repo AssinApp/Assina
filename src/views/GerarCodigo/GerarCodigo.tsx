@@ -14,11 +14,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 // URL base para requisições
-const baseURL = ' https://b0ec-179-214-114-118.ngrok-free.app';
+const baseURL = 'http://10.0.2.2:8000';
 console.log('Base URL:', baseURL);
 
 const GerarCodigo = ({ route }: any) => {
-  const email = route?.params?.email || 'user@example.com'; // Email padrão
+  const email = route?.params?.email || 'eduardo-gurgel@hotmail.com'; // Email padrão
   const [otp, setOtp] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(new Animated.Value(1));
@@ -28,26 +28,29 @@ const GerarCodigo = ({ route }: any) => {
     try {
       setLoading(true);
       console.log('Fetching OTP from:', `${baseURL}/otp/${email}`);
-
-      // Requisição ao backend com cabeçalhos adicionais
-      const response = await axios.get(`${baseURL}/otp/${email}`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'ExpoApp', // Adiciona um cabeçalho User-Agent
-        },
-      });
+      const response = await axios.get(`${baseURL}/otp/${email}`);
       console.log('API Response:', response.data);
 
-      // Atualiza o estado com o OTP retornado
       if (response.data?.otp && response.data?.expires_in) {
         setOtp(response.data.otp);
-        resetProgress(response.data.expires_in); // Reseta a barra de progresso
+
+        // Atualiza o progresso com base no tempo de expiração
+        resetProgress(response.data.expires_in);
+
+        // Agende a próxima atualização com base no tempo de expiração
+        setTimeout(fetchOtp, (response.data.expires_in - 1) * 1000); // Atualiza 1s antes de expirar
       } else {
         throw new Error('Resposta inválida da API.');
       }
     } catch (error) {
-      console.error('Erro ao buscar o código OTP:', error);
-      ToastAndroid.show('Erro ao buscar o código OTP! Verifique sua conexão.', ToastAndroid.SHORT);
+      if (error.response) {
+        console.error('Erro na resposta da API:', error.response.data);
+      } else if (error.request) {
+        console.error('Erro na conexão com a API:', error.message);
+      } else {
+        console.error('Erro desconhecido:', error.message);
+      }
+      ToastAndroid.show('Erro ao buscar o código OTP!', ToastAndroid.SHORT);
       setOtp('Erro');
     } finally {
       setLoading(false);
@@ -59,6 +62,9 @@ const GerarCodigo = ({ route }: any) => {
     try {
       console.log('Testando conexão com fetch...');
       const response = await fetch(`${baseURL}/otp/${email}`);
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`);
+      }
       const data = await response.json();
       console.log('Response from fetch:', data);
     } catch (error) {
@@ -79,10 +85,12 @@ const GerarCodigo = ({ route }: any) => {
   // Efeito para buscar o código inicialmente e atualizar a cada 30 segundos
   useEffect(() => {
     fetchOtp(); // Busca o código inicial
-    testNgrok(); // Testa a conectividade com `fetch`
     const interval = setInterval(fetchOtp, 30000); // Atualiza o código a cada 30 segundos
 
-    return () => clearInterval(interval); // Limpa o intervalo ao desmontar o componente
+    return () => {
+      clearInterval(interval); // Limpa o intervalo
+      setOtp(null); // Reseta o estado do OTP
+    };
   }, [email]);
 
   // Função para copiar o código para a área de transferência

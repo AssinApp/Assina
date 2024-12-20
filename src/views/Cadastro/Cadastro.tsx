@@ -23,7 +23,7 @@ export default function Cadastro({ navigation }: StackProps) {
       const response = await fetch('http://10.0.2.2:8000/users/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }), // Inclui o campo 'name'
       });
       if (response.ok) {
         ToastAndroid.show('Conta criada com sucesso!', ToastAndroid.SHORT);
