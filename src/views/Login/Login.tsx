@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackProps } from '@/navigator/stack';
 import { colors } from '@/theme';
 
@@ -8,14 +9,29 @@ export default function Login({ navigation }: StackProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!email || !password) {
       ToastAndroid.show('Preencha todos os campos!', ToastAndroid.SHORT);
       return;
     }
-
-    console.log('[##] loggedIn true');
-    navigation.navigate('HomeTab', { screen: 'HomeAuth', params: { isLoggedIn: true } });
+    try {
+      const response = await fetch('http://10.0.2.2:8000/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
+      });
+      const data = await response.json();
+      console.log('Resposta do servidor:', data);
+      if (response.ok) {
+        await AsyncStorage.setItem('token', data.access_token);
+        navigation.navigate('HomeTab', { screen: 'HomeAuth', params: { isLoggedIn: true } });
+      } else {
+        ToastAndroid.show('Credenciais inválidas!', ToastAndroid.SHORT);
+      }
+    } catch (error) {
+      console.error('Erro ao conectar:', error);
+      ToastAndroid.show('Erro ao conectar ao servidor!', ToastAndroid.SHORT);
+    }
   };
 
   return (

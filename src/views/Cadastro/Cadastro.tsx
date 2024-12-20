@@ -10,21 +10,30 @@ export default function Cadastro({ navigation }: StackProps) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleCadastro = () => {
+  const handleCadastro = async () => {
     if (!name || !email || !password || !confirmPassword) {
       ToastAndroid.show('Preencha todos os campos!', ToastAndroid.SHORT);
       return;
     }
-
     if (password !== confirmPassword) {
       ToastAndroid.show('As senhas não coincidem!', ToastAndroid.SHORT);
       return;
     }
-
-    // Simulação de cadastro
-    console.log('Cadastro com:', { name, email, password });
-    ToastAndroid.show('Conta criada com sucesso!', ToastAndroid.SHORT);
-    navigation.navigate('Login', { from: 'HomeStack' }); // Redireciona para Login
+    try {
+      const response = await fetch('http://10.0.2.2:8000/users/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      if (response.ok) {
+        ToastAndroid.show('Conta criada com sucesso!', ToastAndroid.SHORT);
+        navigation.navigate('LoginStack', { from: 'CadastroStack' });
+      } else {
+        ToastAndroid.show('Erro ao criar conta!', ToastAndroid.SHORT);
+      }
+    } catch {
+      ToastAndroid.show('Erro ao conectar ao servidor!', ToastAndroid.SHORT);
+    }
   };
 
   return (
@@ -65,7 +74,7 @@ export default function Cadastro({ navigation }: StackProps) {
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+      <TouchableOpacity onPress={() => navigation.navigate('LoginStack', { from: 'HomeStack' })}>
         <Text style={styles.linkText}>Já tem uma conta? Faça Login</Text>
       </TouchableOpacity>
     </View>

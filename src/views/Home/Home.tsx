@@ -40,6 +40,14 @@ export default function Home({ navigation }: StackProps) {
         style={[styles.button, { marginTop: 16 }]}
         onPress={() => navigation.navigate('CadastroStack', { from: 'HomeStack' })}
       />
+
+      {/* Botão de 2FA OTP */}
+      <Button
+        title="Verificar OTP"
+        titleStyle={styles.buttonTitle}
+        style={[styles.button, { marginTop: 16 }]}
+        onPress={() => navigation.navigate('GerarCodigoStack', { from: 'HomeStack' })}
+      />
     </View>
   );
 }

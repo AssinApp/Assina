@@ -24,7 +24,7 @@ const navigationProps = {
 export function HomeStackNavigator({ navigation, route }: StackProps) {
   const toggleDrawer = () => navigation.dispatch(DrawerActions.toggleDrawer()); // Adicione a função aqui
 
-  const initialRoute = route?.params?.isLoggedIn ? 'HomeAuth' : 'HomeStack';
+  const initialRoute = route?.params?.screen || 'HomeStack';
 
   return (
     <Stack.Navigator initialRouteName={initialRoute} screenOptions={navigationProps}>

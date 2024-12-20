@@ -48,7 +48,7 @@ export default function TabNavigator() {
         listeners={({ navigation }) => ({
           tabPress: e => {
             e.preventDefault(); // Previne o comportamento padrão
-            navigation.navigate('HomeTab', { screen: 'HomeAuth' }); // Sempre navega para HomeAuth
+            navigation.navigate('HomeTab', { screen: 'HomeAuth', params: { isLoggedIn: true } });
           },
         })}
       />

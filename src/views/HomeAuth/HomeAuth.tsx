@@ -1,26 +1,29 @@
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
 export default function HomeAuth() {
-  const navigation = useNavigation();
+  const [userName, setUserName] = useState('');
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        const response = await fetch('http://10.0.2.2:8000/users/me', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (response.ok) setUserName(data.email);
+      }
+    };
+    fetchUser();
+  }, []);
 
   return (
     <View style={styles.container}>
-      {/* Conteúdo principal da tela */}
-      <Text style={styles.title}>Bem-vindo à Home Autenticada</Text>
-      <Text style={styles.subtitle}>
-        Você está autenticado. Aproveite as funcionalidades disponíveis.
-      </Text>
-
-      {/* Botão Flutuante */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => navigation.navigate('AssinaturaStack', { from: HomeAuth })} // Redireciona para a tela Assinatura
-      >
-        <Text style={styles.fabIcon}>+</Text>
-      </TouchableOpacity>
+      <Text style={styles.title}>Bem-vindo, {userName}</Text>
     </View>
   );
 }
