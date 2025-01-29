@@ -9,6 +9,7 @@ export type StackParamList = {
   AssinaturaStack: { from: string };
   LoginStack: { from: string };
   CadastroStack: { from: string };
+  HistoricoStack: { from: string };
   
   // add more screen props...
 };

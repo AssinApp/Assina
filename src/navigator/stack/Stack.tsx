@@ -5,6 +5,7 @@ import Assinatura from '@/views/Assinatura';
 import Cadastro from '@/views/Cadastro';
 import Details from '@/views/GerarCodigo';
 import { DrawerActions } from '@react-navigation/native';
+import HistoricoAssinaturas from '@/views/Historico';
 import Home from '@/views/Home';
 import HomeAuth from '@/views/HomeAuth';
 import Login from '@/views/Login';
@@ -41,7 +42,7 @@ export function HomeStackNavigator({ navigation, route }: StackProps) {
         name="HomeAuth"
         component={HomeAuth}
         options={{
-          title: 'Home Autenticada',
+          title: 'Página inicial',
           headerTitleAlign: 'center',
           headerLeft: () => <StackHeaderLeft onPress={toggleDrawer} />, // Botão do Drawer
         }}
@@ -61,6 +62,12 @@ export function HomeStackNavigator({ navigation, route }: StackProps) {
         name="AssinaturaStack"
         component={Assinatura}
         options={{ title: 'Assinatura' }}
+      />
+
+      <Stack.Screen
+        name="HistoricoStack"
+        component={HistoricoAssinaturas}
+        options={{ title: 'Historico' }}
       />
 
       <Stack.Screen name="CadastroStack" component={Cadastro} options={{ title: 'Cadastro' }} />

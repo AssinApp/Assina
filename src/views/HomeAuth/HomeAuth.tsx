@@ -36,7 +36,7 @@ export default function HomeAuth() {
   };
 
   const navigateToAssinatura = () => {
-    navigation.navigate('AssinaturaStack');
+    navigation.navigate('AssinaturaStack', { userName });
   };
 
   return (

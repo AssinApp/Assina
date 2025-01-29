@@ -18,7 +18,20 @@ if (typeof global.btoa === 'undefined') {
 }
 */
 
-export default function Assinatura() {
+interface AssinaturaProps {
+  route?: {
+    params?: {
+      userName?: string;
+    };
+  };
+  // Se estiver usando React Navigation 6+, pode tipar adequadamente
+  // Mas aqui basta saber que route.params?.userName é opcional
+}
+
+export default function Assinatura({ route }: AssinaturaProps) {
+  // Pega userName dos parâmetros (ou define "Usuário" como fallback)
+  const userName = route?.params?.userName ?? 'Usuário';
+
   // PDF original e PDF assinado
   const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
   const [signedPdfUri, setSignedPdfUri] = useState<string | null>(null);
@@ -40,12 +53,12 @@ export default function Assinatura() {
         // Define manualmente o valor, sem offsets acumulados
         // Assim pan.x, pan.y refletem em tempo real a posição do arraste
         pan.setValue({
-          x: 50 + gestureState.dx, // 50 é um offset inicial, se quiser
+          x: 50 + gestureState.dx, // offset inicial 50, se quiser
           y: 50 + gestureState.dy,
         });
       },
       onPanResponderRelease: () => {
-        // Não fazemos extractOffset, pois leremos pan.x._value no botão
+        // Não chamamos extractOffset
       },
     }),
   ).current;
@@ -113,7 +126,7 @@ export default function Assinatura() {
       const firstPage = pdfDoc.getPages()[0];
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-      // Desenha um retângulo grande para ficar visível
+      // Desenha um retângulo grande para teste
       firstPage.drawRectangle({
         x: xPos - 50,
         y: yPos - 20,
@@ -124,7 +137,7 @@ export default function Assinatura() {
         color: rgb(1, 1, 0), // fundo amarelo
       });
 
-      // Texto azul
+      // Texto em azul
       firstPage.drawText(text, {
         x: xPos,
         y: yPos,
@@ -183,7 +196,8 @@ export default function Assinatura() {
     console.log('Assinatura no PDF:', { pdfX, pdfY });
 
     try {
-      const newPdfUri = await signPdf(selectedPdf, pdfX, pdfY, 'Assinado por: João Silva');
+      // Aqui usamos o userName no lugar do "João Silva"
+      const newPdfUri = await signPdf(selectedPdf, pdfX, pdfY, `Assinado por: ${userName}`);
       setSignedPdfUri(newPdfUri);
 
       Alert.alert('Sucesso', 'PDF assinado! (Veja a prévia abaixo)');
@@ -240,7 +254,6 @@ export default function Assinatura() {
       return;
     }
     try {
-      // Pode usar o Share do React Native
       await Share.share({
         url: signedPdfUri,
         message: 'Segue meu PDF assinado!',
@@ -253,6 +266,7 @@ export default function Assinatura() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Assinatura Digital</Text>
+      <Text style={styles.subtitle}>Usuário logado: {userName}</Text>
 
       <View style={styles.buttonRow}>
         <Button title="Escolher PDF" onPress={pickDocument} />
@@ -345,9 +359,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 5,
     color: '#333',
     textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 16,
+    marginBottom: 15,
+    textAlign: 'center',
+    color: '#666',
   },
   buttonRow: {
     flexDirection: 'row',
