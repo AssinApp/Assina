@@ -100,7 +100,6 @@ export default function App() {
       console.error(error);
     }
   };
-
   const handleDownload = async () => {
     if (!signedPdfUri) return;
 
