@@ -39,6 +39,7 @@
     "expo-font": "~13.0.1",
     "expo-image": "~2.0.2",
     "expo-linear-gradient": "~14.0.1",
+    "expo-print": "^14.0.3",
     "expo-splash-screen": "~0.29.13",
     "expo-status-bar": "~2.0.0",
     "expo-updates": "~0.26.9",

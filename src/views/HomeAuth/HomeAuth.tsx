@@ -35,11 +35,20 @@ export default function HomeAuth() {
     ]);
   };
 
+  const navigateToAssinatura = () => {
+    navigation.navigate('AssinaturaStack');
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bem-vindo, {userName}</Text>
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Sair</Text>
+      </TouchableOpacity>
+
+      {/* Botão flutuante para redirecionar */}
+      <TouchableOpacity style={styles.fab} onPress={navigateToAssinatura}>
+        <Text style={styles.fabIcon}>+</Text>
       </TouchableOpacity>
     </View>
   );
