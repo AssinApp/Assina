@@ -1,19 +1,31 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
-import * as Print from 'expo-print';
 
 import { Alert, Animated, Button, PanResponder, StyleSheet, Text, View } from 'react-native';
+// Importações do pdf-lib
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import React, { useRef, useState } from 'react';
 
 import Pdf from 'react-native-pdf';
+
+// Se precisar de polyfill para btoa/atob, descomente e ajuste:
+/*
+import { decode as atob, encode as btoa } from 'base-64';
+if (typeof global.atob === 'undefined') {
+  global.atob = atob;
+}
+if (typeof global.btoa === 'undefined') {
+  global.btoa = btoa;
+}
+*/
 
 export default function App() {
   const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
   const [signedPdfUri, setSignedPdfUri] = useState<string | null>(null);
   const [key, setKey] = useState(0);
 
+  // Para controlar a posição da "assinatura"
   const pan = useRef(new Animated.ValueXY({ x: 50, y: 50 })).current;
-
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -26,6 +38,9 @@ export default function App() {
     }),
   ).current;
 
+  /**
+   * Função para abrir o seletor de documento e pegar o URI do PDF escolhido.
+   */
   async function pickDocument() {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -35,6 +50,7 @@ export default function App() {
 
       if (result.assets?.[0]?.uri) {
         setSelectedPdf(result.assets[0].uri);
+        setSignedPdfUri(null);
         setKey(prev => prev + 1);
       }
     } catch (err) {
@@ -42,69 +58,92 @@ export default function App() {
     }
   }
 
+  /**
+   * Função que efetivamente assina o PDF utilizando pdf-lib.
+   */
+  async function signPdf(pdfUri: string, xPos: number, yPos: number, signatureText: string) {
+    try {
+      // 1. Ler o arquivo PDF como base64
+      const pdfBase64 = await FileSystem.readAsStringAsync(pdfUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // 2. Converter base64 em array de bytes
+      const pdfBytes = Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0));
+
+      // 3. Carregar PDF no pdf-lib
+      const pdfDoc = await PDFDocument.load(pdfBytes);
+
+      // 4. Obter a primeira página (ou iterar se quiser assinar várias)
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
+
+      // 5. Configurar fonte e estilo
+      const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const fontSize = 20;
+
+      // 6. Desenhar o texto da assinatura na página
+      firstPage.drawText(signatureText, {
+        x: xPos,
+        y: yPos,
+        size: fontSize,
+        font: font,
+        color: rgb(1, 0, 0), // vermelho
+      });
+
+      // 7. Serializar (salvar) o PDF modificado
+      const modifiedPdfBytes = await pdfDoc.save();
+
+      // 8. Converter para base64 para poder salvar no FileSystem do Expo
+      const modifiedPdfBase64 = btoa(String.fromCharCode(...new Uint8Array(modifiedPdfBytes)));
+
+      // 9. Criar um path temporário para o PDF assinado
+      const newPdfUri = FileSystem.documentDirectory + `pdf-assinado-${Date.now()}.pdf`;
+
+      // 10. Salvar o PDF modificado
+      await FileSystem.writeAsStringAsync(newPdfUri, modifiedPdfBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      return newPdfUri;
+    } catch (error) {
+      console.error('Erro ao assinar PDF:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Handler para clicar no botão de "Posicionar Assinatura".
+   * Lê o PDF, insere a assinatura e salva o resultado em outro arquivo.
+   */
   const handlePositionSignature = async () => {
     if (!selectedPdf) return;
 
     try {
-      // 1. Converter PDF para imagens (simulação - na prática use uma API)
-      const pdfImages = [
-        'https://via.placeholder.com/595x842/FFFFFF/000000?text=P%C3%A1gina+1',
-        'https://via.placeholder.com/595x842/FFFFFF/000000?text=P%C3%A1gina+2',
-      ];
+      // Chama nossa função signPdf
+      const newPdfUri = await signPdf(
+        selectedPdf,
+        pan.x._value, // coordenada X
+        pan.y._value, // coordenada Y
+        'Assinado por: João Silva',
+      );
 
-      // 2. Criar HTML com imagens das páginas
-      let html = '<div style="position: relative;">';
-
-      pdfImages.forEach((img, index) => {
-        html += `
-          <img 
-            src="${img}" 
-            style="width: 100%; height: auto; page-break-after: always;" 
-            alt="Página ${index + 1}"
-          >
-        `;
-      });
-
-      // 3. Adicionar assinatura em todas as páginas
-      html += `
-        <div style="position: absolute;
-                    left: ${pan.x._value}px;
-                    top: ${pan.y._value}px;
-                    color: red;
-                    font-size: 24px;
-                    background: white;
-                    padding: 5px;
-                    z-index: 1000;">
-          Assinado por: João Silva
-        </div>
-      </div>`;
-
-      // 4. Gerar novo PDF
-      const { uri } = await Print.printToFileAsync({
-        html,
-        width: 595,
-        height: 842,
-        base64: false,
-      });
-
-      // 5. Verificar e salvar
-      const fileInfo = await FileSystem.getInfoAsync(uri);
-      if (fileInfo.exists && fileInfo.size > 0) {
-        setSignedPdfUri(uri);
-        Alert.alert('Sucesso!', 'Documento assinado gerado');
-      } else {
-        throw new Error('Arquivo inválido');
-      }
+      setSignedPdfUri(newPdfUri);
+      Alert.alert('Sucesso!', 'Documento assinado gerado');
     } catch (error) {
       Alert.alert('Erro', 'Falha na geração do PDF');
       console.error(error);
     }
   };
+
+  /**
+   * Handler para baixar o documento assinado e salvá-lo na pasta escolhida pelo usuário.
+   */
   const handleDownload = async () => {
     if (!signedPdfUri) return;
 
     try {
-      // 1. Pedir permissão
+      // 1. Pedir permissão para acessar pasta
       const permissions =
         await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
 
@@ -143,7 +182,14 @@ export default function App() {
 
       <View style={styles.buttonRow}>
         <Button title="Escolher PDF" onPress={pickDocument} />
-        <Button title="Fechar PDF" onPress={() => setSelectedPdf(null)} disabled={!selectedPdf} />
+        <Button
+          title="Fechar PDF"
+          onPress={() => {
+            setSelectedPdf(null);
+            setSignedPdfUri(null);
+          }}
+          disabled={!selectedPdf}
+        />
       </View>
 
       {selectedPdf ? (
@@ -155,6 +201,7 @@ export default function App() {
             onError={error => console.error('Erro no PDF:', error)}
           />
 
+          {/* Caixa para arrastar e posicionar a assinatura */}
           <Animated.View
             {...panResponder.panHandlers}
             style={[
