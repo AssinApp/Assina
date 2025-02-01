@@ -266,7 +266,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Assinatura Digital</Text>
-      <Text style={styles.subtitle}>Usuário logado: {userName}</Text>
+      <Text style={styles.subtitle}>Assinar como: {userName}</Text>
 
       <View style={styles.buttonRow}>
         <Button title="Escolher PDF" onPress={pickDocument} />

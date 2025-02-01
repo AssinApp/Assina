@@ -48,6 +48,7 @@
     "react-native": "^0.76.3",
     "react-native-blob-util": "^0.19.11",
     "react-native-clipboard": "^0.0.5",
+    "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-pdf": "^6.7.6",
     "react-native-reanimated": "~3.16.1",

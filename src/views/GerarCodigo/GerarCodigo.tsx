@@ -11,10 +11,12 @@ import {
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
+import { API_BASE_URL } from '@env';
 import axios from 'axios';
 
 // URL base para requisições
-const baseURL = 'http://10.0.2.2:8000';
+const baseURL = `${API_BASE_URL}`;
+
 console.log('Base URL:', baseURL);
 
 const GerarCodigo = ({ route }: any) => {

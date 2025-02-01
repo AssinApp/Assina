@@ -1,6 +1,7 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
+import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 
@@ -12,7 +13,7 @@ export default function HomeAuth() {
     const fetchUser = async () => {
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        const response = await fetch('http://10.0.2.2:8000/users/me', {
+        const response = await fetch(`${API_BASE_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();

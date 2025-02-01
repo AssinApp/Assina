@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 
+import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StackProps } from '@/navigator/stack';
 import { colors } from '@/theme';
@@ -15,7 +16,7 @@ export default function Login({ navigation }: StackProps) {
       return;
     }
     try {
-      const response = await fetch('http://10.0.2.2:8000/token', {
+      const response = await fetch(`${API_BASE_URL}/token/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,

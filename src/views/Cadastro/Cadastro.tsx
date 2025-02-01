@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 
+import { API_BASE_URL } from '@env';
 import { StackProps } from '@/navigator/stack';
 import { colors } from '@/theme';
 
@@ -20,7 +21,7 @@ export default function Cadastro({ navigation }: StackProps) {
       return;
     }
     try {
-      const response = await fetch('http://10.0.2.2:8000/users/', {
+      const response = await fetch(`${API_BASE_URL}/users/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }), // Inclui o campo 'name'
