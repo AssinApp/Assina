@@ -10,23 +10,41 @@ export default function RootNavigator() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>; // 🔥 Define o tipo corretamente
+
     async function checkAuth() {
       const token = await AsyncStorage.getItem('token');
-      setIsLoggedIn(!!token);
+      console.log('Token recuperado:', token);
+
+      if (token) {
+        setIsLoggedIn(true);
+        clearTimeout(timeout); // ✅ Cancela o timeout ao encontrar o token
+        setLoading(false);
+        return;
+      }
+
       setLoading(false);
     }
+
     checkAuth();
+
+    // 🔥 Define um timeout que será cancelado se o token for encontrado antes
+    timeout = setTimeout(() => {
+      console.log('Timeout atingido! Forçando transição...');
+      setLoading(false);
+      setIsLoggedIn(false); // Redireciona para AuthStack se o token não for encontrado
+    }, 10000); // 10 segundos
+
+    return () => clearTimeout(timeout); // ✅ Garante que o timeout seja limpo ao desmontar o componente
   }, []);
 
-  if (loading) return null; // Ou uma tela de splash/loading
+  if (loading) return null; // Pode ser substituído por uma tela de Splash/Loading
 
   return (
     <NavigationContainer>
       {isLoggedIn ? (
-        // Se logado, exibe DrawerNavigator
         <DrawerNavigator setIsLoggedIn={setIsLoggedIn} />
       ) : (
-        // Se não logado, exibe o stack de Autenticação
         <AuthStack setIsLoggedIn={setIsLoggedIn} />
       )}
     </NavigationContainer>
