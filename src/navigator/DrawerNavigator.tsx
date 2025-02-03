@@ -29,7 +29,11 @@ export default function DrawerNavigator({ setIsLoggedIn }) {
         }}>
         {props => <HomeAuth {...props} handleLogout={handleLogout} />}
       </Drawer.Screen>
-      <Drawer.Screen name="Assinatura" component={Assinatura} options={{ title: 'Assinatura' }} />
+      <Drawer.Screen
+        name="Assinatura"
+        component={Assinatura}
+        options={{ title: 'Assinaturaa', headerShown: false, headerTitleAlign: 'center' }}
+      />
       <Drawer.Screen name="Historico" component={Historico} options={{ title: 'Histórico' }} />
       <Drawer.Screen
         name="AssinaturaStack"
