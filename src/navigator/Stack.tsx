@@ -47,6 +47,14 @@ export default function MainStack() {
           headerShown: true,
           title: 'Login',
           headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#422FE0', // Cor de fundo do header
+          },
+          headerTintColor: '#FFFFFF', // Cor do título e dos ícones no header
+          headerTitleStyle: {
+            fontWeight: 'bold', // Deixa o título em negrito (opcional)
+            fontSize: 20, // Ajusta o tamanho da fonte do título
+          },
         }}
       />
 

@@ -21,6 +21,14 @@ export default function AuthStack({ setIsLoggedIn }) {
           headerShown: true,
           title: 'Login',
           headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#1F41BB', // Cor de fundo do header
+          },
+          headerTintColor: '#FFFFFF', // Cor do título e dos ícones no header
+          headerTitleStyle: {
+            fontWeight: 'bold', // Deixa o título em negrito (opcional)
+            fontSize: 20, // Ajusta o tamanho da fonte do título
+          },
         }}>
         {screenProps => (
           // Repasse navigation, route, etc. para Login,
@@ -36,6 +44,14 @@ export default function AuthStack({ setIsLoggedIn }) {
           headerShown: true,
           title: 'Cadastro',
           headerTitleAlign: 'center',
+          headerStyle: {
+            backgroundColor: '#1F41BB', // Cor de fundo do header
+          },
+          headerTintColor: '#FFFFFF', // Cor do título e dos ícones no header
+          headerTitleStyle: {
+            fontWeight: 'bold', // Deixa o título em negrito (opcional)
+            fontSize: 20, // Ajusta o tamanho da fonte do título
+          },
         }}
       />
     </Stack.Navigator>

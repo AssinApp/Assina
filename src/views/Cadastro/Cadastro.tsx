@@ -39,7 +39,8 @@ export default function Cadastro({ navigation }: StackProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Cadastro</Text>
+      <Text style={styles.title}>Crie sua conta!</Text>
+      <Text style={styles.subText}>Crie uma conta para assinar seus documentos</Text>
       <TextInput
         style={styles.input}
         placeholder="Nome"
@@ -92,22 +93,32 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 30,
     textAlign: 'center',
+    color: '#422FE0',
+  },
+  subText: {
+    fontSize: 20,
+    fontWeight: 'light',
+    marginBottom: 50,
+    textAlign: 'center', // Centraliza o texto
+    alignSelf: 'center', // Centraliza no container
     color: colors.darkPurple,
+    maxWidth: 500, // Define uma largura máxima para forçar a quebra de linha
+    lineHeight: 22, // Ajusta a altura entre as linhas para melhor visualização
   },
   input: {
     borderWidth: 1,
-    borderColor: colors.gray,
+    borderColor: colors.black,
     borderRadius: 8,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 25,
     fontSize: 16,
-    backgroundColor: colors.white,
+    backgroundColor: '#F1F4FF',
     color: colors.black,
   },
   button: {
-    backgroundColor: colors.lightPurple,
+    backgroundColor: '#1F41BB',
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -120,8 +131,8 @@ const styles = StyleSheet.create({
   },
   linkText: {
     marginTop: 12,
-    fontSize: 14,
+    fontSize: 15,
     textAlign: 'center',
-    color: colors.lightPurple,
+    color: colors.black,
   },
 });

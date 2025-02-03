@@ -1,7 +1,15 @@
 // Login.tsx
 
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  ToastAndroid,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import React, { useState } from 'react';
-import { StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 
 import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -56,12 +64,19 @@ export default function Login({ navigation, setIsLoggedIn }: LoginScreenProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('@/assets/images/AssinAppLogin.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+      <Text style={styles.title}>Bem vindo de volta!</Text>
 
       <TextInput
         style={styles.input}
         placeholder="E-mail"
-        placeholderTextColor={colors.gray}
+        placeholderTextColor={colors.black}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
@@ -69,7 +84,7 @@ export default function Login({ navigation, setIsLoggedIn }: LoginScreenProps) {
       <TextInput
         style={styles.input}
         placeholder="Senha"
-        placeholderTextColor={colors.gray}
+        placeholderTextColor={colors.black}
         value={password}
         onChangeText={setPassword}
         secureTextEntry
@@ -103,16 +118,27 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: colors.gray,
+    borderColor: colors.black,
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
     fontSize: 16,
-    backgroundColor: colors.white,
+    backgroundColor: '#F1F4FF',
     color: colors.black,
   },
+  logoContainer: {
+    width: '100%',
+    height: 130,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    width: '100%',
+    height: '100%',
+  },
   button: {
-    backgroundColor: colors.lightPurple,
+    backgroundColor: '#1F41BB',
     padding: 12,
     borderRadius: 8,
     alignItems: 'center',
@@ -127,6 +153,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 14,
     textAlign: 'center',
-    color: colors.lightPurple,
+    color: colors.black,
   },
 });
