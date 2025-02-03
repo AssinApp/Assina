@@ -23,12 +23,12 @@ export default function DrawerNavigator({ setIsLoggedIn }) {
     <Drawer.Navigator initialRouteName="HomeAuth">
       <Drawer.Screen
         name="HomeAuth"
-        component={HomeAuth}
         options={{
           title: 'Página Inicial',
-          headerRight: () => <Button title="Logout" onPress={handleLogout} />,
-        }}
-      />
+          headerShown: false, // Ocultando o header padrão
+        }}>
+        {props => <HomeAuth {...props} handleLogout={handleLogout} />}
+      </Drawer.Screen>
       <Drawer.Screen name="Assinatura" component={Assinatura} options={{ title: 'Assinatura' }} />
       <Drawer.Screen name="Historico" component={Historico} options={{ title: 'Histórico' }} />
       <Drawer.Screen
