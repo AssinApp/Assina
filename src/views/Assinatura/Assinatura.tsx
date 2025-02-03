@@ -26,6 +26,7 @@ import React, { useRef, useState } from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Pdf from 'react-native-pdf';
+import { useNavigation } from '@react-navigation/native';
 
 interface AssinaturaProps {
   route?: {
@@ -36,6 +37,11 @@ interface AssinaturaProps {
 }
 
 export default function Assinatura({ route }: AssinaturaProps) {
+  const navigation = useNavigation();
+
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
   // Nome do usuário
   const userName = route?.params?.userName ?? 'Usuário';
 
@@ -305,7 +311,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
       <View style={styles.header}>
         <View style={styles.headerLeft}>
           {/* Botão "Voltar" de exemplo (pode colocar uma navegação real) */}
-          <TouchableOpacity style={styles.iconButton} onPress={() => Alert.alert('Voltar')}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleGoBack}>
             <ChevronLeft size={24} color="#4B5563" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Assinar Documento</Text>
