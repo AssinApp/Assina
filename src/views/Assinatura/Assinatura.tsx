@@ -24,6 +24,7 @@ import {
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import React, { useRef, useState } from 'react';
 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Pdf from 'react-native-pdf';
 
 interface AssinaturaProps {
@@ -67,6 +68,28 @@ export default function Assinatura({ route }: AssinaturaProps) {
     }),
   ).current;
 
+  // Pega o nome do documento em PDF
+  const [documentTitle, setDocumentTitle] = useState<string | null>(null);
+
+  // Salvar Assinatura como AsyncStorage
+  const saveSignedDocument = async (title: string, user: string) => {
+    try {
+      const existingDocs = await AsyncStorage.getItem(`signedDocuments_${user}`);
+      const documents = existingDocs ? JSON.parse(existingDocs) : [];
+
+      const newDocument = {
+        title,
+        status: 'signed',
+        date: new Date().toLocaleDateString(),
+      };
+
+      const updatedDocs = [...documents, newDocument];
+      await AsyncStorage.setItem(`signedDocuments_${user}`, JSON.stringify(updatedDocs));
+    } catch (error) {
+      console.error('Erro ao salvar documento assinado:', error);
+    }
+  };
+
   /**
    * Selecionar documento PDF
    */
@@ -79,10 +102,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
       if (result.type === 'cancel') return;
 
       if (result.assets?.[0]?.uri) {
-        const { uri } = result.assets[0];
+        const { uri, name } = result.assets[0];
         setSelectedPdf(uri);
         setSignedPdfUri(null);
         setKey(prev => prev + 1);
+        setDocumentTitle(name || 'Documento sem título');
 
         // Ler dimensões do PDF para cálculos futuros
         await loadPdfDimensions(uri);
@@ -144,6 +168,12 @@ export default function Assinatura({ route }: AssinaturaProps) {
       const newPdfUri = await signPdf(selectedPdf, pdfX, pdfY, `Assinado por: ${userName}`);
       setSignedPdfUri(newPdfUri);
       Alert.alert('Sucesso', 'PDF assinado! (Veja a prévia abaixo)');
+
+      if (documentTitle) {
+        await saveSignedDocument(documentTitle, userName);
+      }
+
+      // Salvar documento assinado no AsyncStorage
     } catch (err) {
       console.error(err);
       Alert.alert('Erro', 'Falha ao assinar PDF');

@@ -14,11 +14,30 @@ export default function HomeAuth({ handleLogout }) {
   const navigation = useNavigation();
 
   // Exemplo de Documentos Recentes
-  const recentDocuments = [
-    { title: 'Contrato de Prestação de Serviços', status: 'signed', date: '15/03/2024' },
-    { title: 'Acordo de Confidencialidade', status: 'pending', date: '14/03/2024' },
-    { title: 'Procuração', status: 'signed', date: '13/03/2024' },
-  ];
+  const [recentDocuments, setRecentDocuments] = useState([]);
+
+  const loadSignedDocuments = async (user: string) => {
+    try {
+      const savedDocs = await AsyncStorage.getItem(`signedDocuments_${user}`);
+      if (savedDocs) {
+        const documents = JSON.parse(savedDocs);
+        setRecentDocuments(documents);
+
+        // Contar quantos são assinados e quantos são pendentes
+        const signedDocs = documents.filter(doc => doc.status === 'signed').length;
+        const pendingDocs = documents.filter(doc => doc.status === 'pending').length;
+
+        setSignedCount(signedDocs);
+        setPendingCount(pendingDocs);
+      } else {
+        setRecentDocuments([]);
+        setSignedCount(0);
+        setPendingCount(0);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar documentos assinados:', error);
+    }
+  };
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -28,15 +47,27 @@ export default function HomeAuth({ handleLogout }) {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
-        if (response.ok) setUserName(data.name);
+        if (response.ok) {
+          setUserName(data.name);
+          await loadSignedDocuments(data.name);
+        }
       }
     };
+
+    const unsubscribe = navigation.addListener('focus', fetchUser);
+
     fetchUser();
-  }, []);
+
+    return unsubscribe;
+  }, [navigation]);
 
   const navigateToAssinatura = () => {
     navigation.navigate('Assinatura', { userName });
   };
+
+  // Contador de documentos
+  const [signedCount, setSignedCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -71,12 +102,12 @@ export default function HomeAuth({ handleLogout }) {
       <View style={styles.quickStats}>
         <View style={[styles.statCard, { backgroundColor: '#E6F7E6' }]}>
           <Icon name="check-circle" size={30} color="green" />
-          <Text style={styles.statText}>28</Text>
+          <Text style={styles.statText}>{signedCount}</Text>
           <Text style={styles.statLabel}>Assinados</Text>
         </View>
         <View style={[styles.statCard, { backgroundColor: '#FFF7E6' }]}>
           <Icon name="clock" size={30} color="orange" />
-          <Text style={styles.statText}>3</Text>
+          <Text style={styles.statText}>{pendingCount}</Text>
           <Text style={styles.statLabel}>Pendentes</Text>
         </View>
       </View>
