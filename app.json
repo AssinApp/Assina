@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "react-native-boilerplate",
-    "slug": "react-native-boilerplate",
+    "name": "AssinApp",
+    "slug": "AssinApp",
     "owner": "wataru",
     "newArchEnabled": true,
     "version": "1.0.0",
     "platforms": ["ios", "android", "web"],
     "orientation": "portrait",
-    "icon": "src/assets/images/logo-lg.png",
+    "icon": "src/assets/images/favicon.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "src/assets/images/splash.png",
