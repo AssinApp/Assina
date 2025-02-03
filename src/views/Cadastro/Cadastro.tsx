@@ -28,7 +28,7 @@ export default function Cadastro({ navigation }: StackProps) {
       });
       if (response.ok) {
         ToastAndroid.show('Conta criada com sucesso!', ToastAndroid.SHORT);
-        navigation.navigate('LoginStack', { from: 'CadastroStack' });
+        navigation.navigate('Login', { from: 'CadastroStack' });
       } else {
         ToastAndroid.show('Erro ao criar conta!', ToastAndroid.SHORT);
       }
@@ -75,7 +75,7 @@ export default function Cadastro({ navigation }: StackProps) {
         <Text style={styles.buttonText}>Cadastrar</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('LoginStack', { from: 'HomeStack' })}>
+      <TouchableOpacity onPress={() => navigation.navigate('Login', { from: 'HomeStack' })}>
         <Text style={styles.linkText}>Já tem uma conta? Faça Login</Text>
       </TouchableOpacity>
     </View>

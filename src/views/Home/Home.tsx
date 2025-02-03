@@ -1,52 +1,40 @@
-import { ActivityIndicator, StatusBar, StyleSheet, Text, View } from 'react-native';
-import React, { useEffect } from 'react';
+import { Image, StatusBar, StyleSheet, Text, View } from 'react-native';
 
 import Button from '@/components/Button';
+import React from 'react';
 import { StackProps } from '@/navigator/stack';
 import { colors } from '@/theme';
 
-// Simule um estado global de login (pode ser substituído por Context API ou AsyncStorage)
-const isLoggedIn = false; // Defina como true para simular um usuário logado
-
 export default function Home({ navigation }: StackProps) {
-  useEffect(() => {
-    // Verifica se o usuário está logado
-    if (isLoggedIn) {
-      // Redireciona para HomeLogada
-      navigation.replace('HomeLogged');
-    }
-  }, []);
-
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" />
-      <Text style={styles.title}>Bem-vindo ao AssinApp</Text>
+
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('@/assets/images/AssinAppLogin.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
+
+      <Text style={styles.title}>Assinaturas digitais simplificadas</Text>
       <Text style={styles.subtitle}>
         Assine documentos de forma segura e prática com autenticação de dois fatores.
       </Text>
 
-      {/* Botão de Login */}
       <Button
         title="Login"
         titleStyle={styles.buttonTitle}
         style={styles.button}
-        onPress={() => navigation.navigate('LoginStack', { from: 'HomeStack' })}
+        onPress={() => navigation.navigate('Login')}
       />
 
-      {/* Botão de Cadastro */}
       <Button
         title="Cadastre-se"
         titleStyle={styles.buttonTitle}
-        style={[styles.button, { marginTop: 16 }]}
-        onPress={() => navigation.navigate('CadastroStack', { from: 'HomeStack' })}
-      />
-
-      {/* Botão de 2FA OTP */}
-      <Button
-        title="Verificar OTP"
-        titleStyle={styles.buttonTitle}
-        style={[styles.button, { marginTop: 16 }]}
-        onPress={() => navigation.navigate('GerarCodigoStack', { from: 'HomeStack' })}
+        style={[styles.button, styles.secondaryButton]}
+        onPress={() => navigation.navigate('Cadastro')}
       />
     </View>
   );
@@ -55,17 +43,28 @@ export default function Home({ navigation }: StackProps) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.lightGrayPurple,
+    backgroundColor: colors.white,
     paddingHorizontal: 20,
+  },
+  logoContainer: {
+    width: '80%',
+    height: 150,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  logo: {
+    width: '100%',
+    height: '100%',
   },
   title: {
     fontSize: 28,
-    marginBottom: 20,
+    marginBottom: 16,
     fontWeight: 'bold',
     color: colors.darkPurple,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
@@ -79,11 +78,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   button: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 22,
-    backgroundColor: colors.lightPurple,
-    height: 44,
-    width: '70%',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 15,
+    backgroundColor: '#1F41BB',
+    height: 50,
+    width: '80%',
+    marginBottom: 12,
+  },
+  secondaryButton: {
+    backgroundColor: colors.darkPurple,
   },
 });

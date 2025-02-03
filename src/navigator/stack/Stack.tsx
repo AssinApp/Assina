@@ -33,8 +33,7 @@ export function HomeStackNavigator({ navigation, route }: StackProps) {
         name="HomeStack"
         component={Home}
         options={{
-          title: 'Home',
-          headerTitleAlign: 'center',
+          headerShown: false,
         }}
       />
 

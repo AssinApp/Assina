@@ -1,18 +1,17 @@
 import { Alert, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { DrawerActions, StackActions, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 
 import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import HistoricoAssinaturas from '../../views/Historico';
-import TabNavigator from '../tab/Tab';
+import HistoricoAssinaturas from '@/views/Historico';
+import HomeAuth from '@/views/HomeAuth';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { useNavigation } from '@react-navigation/native';
 
 const Drawer = createDrawerNavigator();
 
 /**
  * Componente que renderiza o conteúdo do Drawer (foto, nome, email, etc.).
- * Recebe as props do Drawer, incluindo navigation.
  */
 const drawerContents = props => {
   const navigation = useNavigation();
@@ -21,7 +20,6 @@ const drawerContents = props => {
   const [userEmail, setUserEmail] = useState('');
   const [userPhoto, setUserPhoto] = useState('');
 
-  // Exemplo: buscar dados do usuário no backend (ou no AsyncStorage).
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -46,27 +44,28 @@ const drawerContents = props => {
   }, []);
 
   /**
-   * Handler de logout (mesmo do HomeAuth)
+   * Handler de logout:
+   * - Remove token
+   * - Redireciona para "Home" do stack principal
    */
   const handleLogout = async () => {
-    Alert.alert('Sair', 'Tem certeza que deseja sair?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sair',
-        onPress: async () => {
-          await AsyncStorage.removeItem('token'); // Remove o token
-          // Redireciona para a tela de login (ajuste a rota conforme seu Stack)
-          navigation.navigate('LoginStack', { from: 'Drawer' });
-        },
-      },
-    ]);
-  };
+    try {
+      await AsyncStorage.removeItem('token');
 
+      // Aguarde um pequeno tempo antes de resetar
+      setTimeout(() => {
+        navigation.dispatch(
+          StackActions.replace('Login'), // Substitui a tela atual por Login
+        );
+      }, 100);
+    } catch (err) {
+      console.log(err);
+    }
+  };
   /**
-   * Navegar para o histórico
+   * Navegar para o histórico (rota do Drawer)
    */
   const handleHistorico = () => {
-    // Nome da rota exata que você registrou no Drawer para o histórico
     navigation.navigate('Historico');
   };
 
@@ -76,22 +75,17 @@ const drawerContents = props => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.headerContainer}>
-        {/* Foto arredondada */}
         <Image source={{ uri: userPhoto || defaultPhoto }} style={styles.profileImage} />
-        {/* Nome e email */}
         <Text style={styles.userName}>{userName}</Text>
         <Text style={styles.userEmail}>{userEmail}</Text>
       </View>
 
-      {/* Linha de separação */}
       <View style={styles.separator} />
 
-      {/* Botão "Histórico" */}
       <TouchableOpacity style={styles.drawerButton} onPress={handleHistorico}>
         <Text style={styles.drawerButtonText}>Histórico</Text>
       </TouchableOpacity>
 
-      {/* Botão "Sair" */}
       <TouchableOpacity
         style={[styles.drawerButton, { backgroundColor: '#ff4d4d' }]}
         onPress={handleLogout}>
@@ -102,20 +96,15 @@ const drawerContents = props => {
 };
 
 /**
- * O DrawerNavigator propriamente dito.
+ * DrawerNavigator
  */
 function DrawerNavigator() {
   return (
     <Drawer.Navigator
-      initialRouteName="MainDrawer"
-      screenOptions={{ headerShown: false }}
-      drawerContent={drawerContents}>
-      <Drawer.Screen
-        name="MainDrawer"
-        component={TabNavigator}
-        options={{ title: 'Tela Principal' }}
-      />
-
+      initialRouteName="HomeAuth"
+      drawerContent={drawerContents}
+      screenOptions={{ headerShown: true }}>
+      <Drawer.Screen name="HomeAuth" component={HomeAuth} options={{ title: 'Página inicial' }} />
       <Drawer.Screen
         name="Historico"
         component={HistoricoAssinaturas}
@@ -127,9 +116,6 @@ function DrawerNavigator() {
 
 export default DrawerNavigator;
 
-/**
- * Estilos
- */
 const styles = StyleSheet.create({
   headerContainer: {
     alignItems: 'center',
@@ -139,7 +125,7 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 100,
     height: 100,
-    borderRadius: 50, // Deixa a imagem redonda
+    borderRadius: 50,
     marginBottom: 10,
     backgroundColor: '#ccc',
   },

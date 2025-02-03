@@ -2,6 +2,7 @@ import { HomeStackNavigator, ProfileStackNavigator } from '../stack/Stack';
 import { TabBarStatus, TabParamList } from './Tab.typeDefs';
 
 import { AntDesign } from '@expo/vector-icons';
+import HomeAuth from '@/views/HomeAuth';
 import React from 'react';
 import { colors } from '@/theme';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -9,7 +10,7 @@ import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
-const hiddenRoutes = ['LoginStack', 'CadastroStack', 'HomeStack'];
+const hiddenRoutes = ['LoginStack', 'CadastroStack', 'HomeStack', 'HomeAuth'];
 
 const renderTabBarIcon = (tabName: keyof TabParamList) => (tabStatus: TabBarStatus) => {
   switch (tabName) {
@@ -42,13 +43,11 @@ export default function TabNavigator() {
       <Tab.Screen
         name="HomeTab"
         component={HomeStackNavigator}
-        options={{
-          title: 'Home',
-        }}
+        options={{ title: 'Home' }}
         listeners={({ navigation }) => ({
           tabPress: e => {
-            e.preventDefault(); // Previne o comportamento padrão
-            navigation.navigate('HomeTab', { screen: 'HomeAuth', params: { isLoggedIn: true } });
+            e.preventDefault(); // Previne o comportamento padrão da tab
+            navigation.navigate('HomeAuth'); // 🚀 Redireciona para a HomeAuth corretamente
           },
         })}
       />
