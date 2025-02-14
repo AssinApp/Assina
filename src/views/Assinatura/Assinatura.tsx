@@ -254,33 +254,29 @@ export default function Assinatura({ route }: AssinaturaProps) {
         return;
       }
 
-      console.log('🔑 [1/5] Token obtido:', token);
-
-      // Buscar ID e Nome do usuário (via API ou cache)
+      // Buscar ID e Nome do usuário
       let userInfo = await fetchUserInfo();
       if (!userInfo) {
         console.error('❌ [ERRO] ID ou Nome do usuário não encontrados.');
         return;
       }
+
       console.log(`🔑 [1/5] ID do usuário: ${userInfo.id}, Nome: ${userInfo.cn}`);
 
-      // 🔹 Etapa 2: Verificar se já temos um certificado válido
-      console.log('📌 [2/5] Verificando se já temos um certificado...');
+      // Verificar se já temos um certificado válido
       if (!certificate) {
         console.warn('📜 Nenhum certificado encontrado. Gerando um novo...');
-        certificate = await generateCertificate(userInfo); // Passando userInfo para evitar nova chamada
+        certificate = await generateCertificate(userInfo);
         if (!certificate) {
           Alert.alert('Erro', 'Falha ao gerar certificado antes da assinatura.');
           return;
         }
-        console.log('✅ [2/5] Novo certificado gerado com sucesso!');
+        console.log('✅ Certificado gerado com sucesso!');
       } else {
-        console.log('✅ [2/5] Certificado já disponível!');
+        console.log('✅ Certificado já disponível!');
       }
 
-      // 🔹 Etapa 3: Criar FormData para envio do PDF
-      console.log('📌 [3/5] Preparando envio do PDF para assinatura...');
-
+      // Criar FormData para envio do PDF
       const formData = new FormData();
       formData.append('file', {
         uri: selectedPdf,
@@ -298,14 +294,40 @@ export default function Assinatura({ route }: AssinaturaProps) {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
+          Accept: 'application/pdf', // Mudança para garantir a resposta correta
         },
         body: formData,
       });
 
-      console.log('📄 [4/5] Resposta da API:', await response.text());
+      if (!response.ok) {
+        console.error('❌ Erro ao assinar o PDF:', await response.text());
+        Alert.alert('Erro', 'Falha ao assinar documento.');
+        return;
+      }
+
+      // Convertendo a resposta binária para base64
+      const pdfBlob = await response.blob();
+      const reader = new FileReader();
+      reader.readAsDataURL(pdfBlob);
+      reader.onloadend = async () => {
+        const base64data = reader.result.split(',')[1]; // Pega apenas a parte base64
+
+        // Criando o caminho para salvar o PDF assinado
+        const signedPdfPath = FileSystem.documentDirectory + `pdf_assinado_${Date.now()}.pdf`;
+
+        await FileSystem.writeAsStringAsync(signedPdfPath, base64data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        console.log('✅ PDF assinado salvo:', signedPdfPath);
+
+        // Atualiza o estado para exibir o PDF salvo
+        setSignedPdfUri(signedPdfPath);
+        Alert.alert('Sucesso', 'PDF assinado e salvo!');
+      };
     } catch (error) {
       console.error('❌ [ERRO] Exceção ao assinar PDF:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao processar o documento.');
     }
   }
 
