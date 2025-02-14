@@ -25,6 +25,25 @@ export default function Login({ navigation, setIsLoggedIn }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
+  async function fetchUserData(token: string) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/users/me`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        console.log('[DEBUG] Payload do usuário:', userData); // Printando o payload no console
+        return userData;
+      } else {
+        console.error('[ERROR] Falha ao obter dados do usuário');
+      }
+    } catch (error) {
+      console.error('[ERROR] Erro ao conectar ao servidor:', error);
+    }
+  }
+
   async function handleLogin() {
     if (!email || !password) {
       ToastAndroid.show('Preencha todos os campos!', ToastAndroid.SHORT);
@@ -42,22 +61,17 @@ export default function Login({ navigation, setIsLoggedIn }: LoginScreenProps) {
       if (response.ok) {
         await AsyncStorage.setItem('token', data.access_token);
 
-        // Se você estiver usando RootNavigator com isLoggedIn,
-        // basta acionar setIsLoggedIn(true) que a tela troca sozinha para o Drawer.
+        // Buscar os dados do usuário e printar o payload
+        await fetchUserData(data.access_token);
+
         if (setIsLoggedIn) {
           setIsLoggedIn(true);
         }
-
-        // Se você quiser FORÇAR a navegação dentro do AuthStack (opcional):
-        // navigation.reset({
-        //   index: 0,
-        //   routes: [{ name: 'HomeAuth' }],
-        // });
       } else {
         ToastAndroid.show('Credenciais inválidas!', ToastAndroid.SHORT);
       }
     } catch (error) {
-      console.error('Erro ao conectar:', error);
+      console.error('[ERROR] Erro ao conectar:', error);
       ToastAndroid.show('Erro ao conectar ao servidor!', ToastAndroid.SHORT);
     }
   }
