@@ -24,8 +24,12 @@ import {
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import React, { useRef, useState } from 'react';
 
+import { API_BASE_URL } from '@env';
+import { API_SIGNATURE_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Pdf from 'react-native-pdf';
+import { generateCertificate } from '../../services/certificateService';
+import { jwtDecode } from 'jwt-decode';
 import { useNavigation } from '@react-navigation/native';
 
 interface AssinaturaProps {
@@ -37,6 +41,40 @@ interface AssinaturaProps {
 }
 
 export default function Assinatura({ route }: AssinaturaProps) {
+  const getUserInfo = async () => {
+    try {
+      const userId = await AsyncStorage.getItem('user_id');
+      const userName = await AsyncStorage.getItem('user_name');
+
+      if (!userId || !userName) {
+        console.warn('⚠️ ID ou Nome do usuário não encontrados no AsyncStorage.');
+        return null;
+      }
+
+      console.log(`👤 Usuário encontrado: ID=${userId}, Nome=${userName}`);
+      return { id: userId, cn: userName };
+    } catch (error) {
+      console.error('❌ Erro ao obter informações do usuário:', error);
+      return null;
+    }
+  };
+  const [certificate, setCertificate] = useState(null);
+  async function handleGenerateCertificate() {
+    try {
+      const certData = await generateCertificate(userName); // 🔥 Passa o userName diretamente
+
+      if (certData) {
+        console.log('✅ Certificado gerado:', certData);
+        setCertificate(certData);
+      } else {
+        Alert.alert('Erro', 'Falha ao gerar certificado.');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao gerar certificado:', error);
+      Alert.alert('Erro', 'Falha ao gerar certificado.');
+    }
+  }
+
   const navigation = useNavigation();
 
   const handleGoBack = () => {
@@ -95,6 +133,151 @@ export default function Assinatura({ route }: AssinaturaProps) {
       console.error('Erro ao salvar documento assinado:', error);
     }
   };
+
+  const fetchToken = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/token/`, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+      });
+
+      if (!response.ok) {
+        console.error('❌ Erro ao buscar token:', await response.text());
+        return null;
+      }
+
+      const data = await response.json();
+      const token = data.access_token;
+
+      if (token) {
+        console.log('✅ Novo token obtido:', token);
+        return token;
+      } else {
+        console.error('❌ Nenhum token retornado pela API.');
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Erro ao obter token:', error.message);
+      return null;
+    }
+  };
+
+  async function refreshToken() {
+    try {
+      let token = await AsyncStorage.getItem('token'); // Pega o token atual
+
+      if (!token) {
+        console.error('❌ Nenhum token armazenado para renovar.');
+        return null;
+      }
+
+      console.log('🔄 Tentando renovar token...');
+
+      const refreshResponse = await fetch(`${API_BASE_URL}/refresh-token`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token.trim()}`,
+          Accept: 'application/json',
+        },
+      });
+
+      if (!refreshResponse.ok) {
+        console.error('❌ Erro ao renovar token:', await refreshResponse.text());
+        return null;
+      }
+
+      const refreshData = await refreshResponse.json();
+
+      if (refreshData.access_token) {
+        await AsyncStorage.setItem('token', refreshData.access_token);
+        console.log('✅ Token renovado com sucesso:', refreshData.access_token);
+        return refreshData.access_token;
+      } else {
+        console.error('❌ Erro: Token não retornado pela API.');
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ Erro ao tentar renovar token:', error);
+      return null;
+    }
+  }
+
+  async function sendPdfToSign() {
+    if (!selectedPdf) {
+      Alert.alert('Erro', 'Selecione um arquivo primeiro!');
+      return;
+    }
+
+    try {
+      let token = await AsyncStorage.getItem('token'); // 🔥 Pegando token do AsyncStorage
+      if (!token) {
+        Alert.alert('Erro', 'Nenhum token encontrado. Faça login novamente.');
+        return;
+      }
+
+      // 🛑 Verifica se já temos um certificado
+      if (!certificate) {
+        console.warn('📜 Nenhum certificado encontrado. Gerando um novo...');
+        await handleGenerateCertificate();
+        if (!certificate) {
+          Alert.alert('Erro', 'Falha ao gerar certificado antes da assinatura.');
+          return;
+        }
+      }
+
+      console.log('🔑 Certificado pronto para uso:', certificate);
+
+      const xScreen = pan.x._value;
+      const yScreen = pan.y._value;
+      const fracX = xScreen / displaySize.width;
+      const fracY = yScreen / displaySize.height;
+      const pdfX = pdfDimensions.width * fracX;
+      const pdfY = pdfDimensions.height * (1 - fracY);
+
+      const formData = new FormData();
+      formData.append('file', {
+        uri: selectedPdf,
+        name: 'document.pdf',
+        type: 'application/pdf',
+      });
+      formData.append('posX', JSON.stringify(pdfX));
+      formData.append('posY', JSON.stringify(pdfY));
+      formData.append('pageNumber', JSON.stringify(1));
+
+      console.log('📤 Enviando PDF para API de assinatura...', formData);
+
+      const response = await fetch(`${API_SIGNATURE_BASE_URL}/api/pdf/signature`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
+        },
+        body: formData,
+      });
+
+      const responseText = await response.text();
+      console.log('📄 Resposta da API:', responseText || '[Resposta vazia]');
+
+      if (!response.ok) {
+        console.error('❌ Erro ao assinar documento:', responseText);
+        Alert.alert('Erro', 'Falha ao assinar o documento.');
+        return;
+      }
+
+      const data = JSON.parse(responseText);
+      if (data.filePath) {
+        console.log('✅ PDF assinado com sucesso:', data.filePath);
+        setSignedPdfUri(data.filePath);
+        Alert.alert('Sucesso', 'Documento assinado!');
+      } else {
+        console.error('❌ Erro ao processar resposta:', data);
+        Alert.alert('Erro', 'Falha ao processar resposta da API.');
+      }
+    } catch (error) {
+      console.error('❌ Erro ao assinar PDF:', error);
+      Alert.alert('Erro', 'Falha ao assinar o documento.');
+    }
+  }
 
   /**
    * Selecionar documento PDF
@@ -245,31 +428,12 @@ export default function Assinatura({ route }: AssinaturaProps) {
     }
 
     try {
-      const permissions =
-        await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-      if (!permissions.granted) {
-        Alert.alert('Permissão negada', 'Não foi possível salvar o arquivo');
-        return;
-      }
-
-      const pdfContent = await FileSystem.readAsStringAsync(signedPdfUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      const newUri = await FileSystem.StorageAccessFramework.createFileAsync(
-        permissions.directoryUri,
-        'Documento_Assinado_' + Date.now(),
-        'application/pdf',
-      );
-
-      await FileSystem.writeAsStringAsync(newUri, pdfContent, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-
-      Alert.alert('Sucesso!', 'Arquivo salvo em:\n' + newUri);
+      const fileUri = FileSystem.documentDirectory + 'pdf_assinado.pdf';
+      const { uri } = await FileSystem.downloadAsync(signedPdfUri, fileUri);
+      Alert.alert('Sucesso!', `Arquivo salvo em:\n${uri}`);
     } catch (error) {
+      console.error('Erro ao baixar PDF:', error);
       Alert.alert('Erro', 'Falha ao salvar arquivo');
-      console.error('Erro no download:', error);
     }
   }
 
@@ -425,9 +589,9 @@ export default function Assinatura({ route }: AssinaturaProps) {
             {/* Ações para assinar ou baixar/compartilhar */}
             {!signedPdfUri && (
               <View style={styles.signatureActions}>
-                <TouchableOpacity style={styles.signatureButton} onPress={handlePositionSignature}>
+                <TouchableOpacity style={styles.signatureButton} onPress={sendPdfToSign}>
                   <PenTool size={20} color="#FFF" />
-                  <Text style={styles.signatureButtonText}>Posicionar Assinatura</Text>
+                  <Text style={styles.signatureButtonText}>Enviar para Assinatura</Text>
                 </TouchableOpacity>
               </View>
             )}
