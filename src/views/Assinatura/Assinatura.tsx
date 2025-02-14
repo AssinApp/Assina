@@ -58,10 +58,46 @@ export default function Assinatura({ route }: AssinaturaProps) {
       return null;
     }
   };
-  const [certificate, setCertificate] = useState(null);
-  async function handleGenerateCertificate() {
+
+  const fetchUserInfo = async () => {
     try {
-      const certData = await generateCertificate(userName); // 🔥 Passa o userName diretamente
+      const token = await AsyncStorage.getItem('token');
+
+      if (!token) {
+        console.warn('❌ Nenhum token encontrado.');
+        return null;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/users/me`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) {
+        console.error('❌ Erro ao buscar usuário:', await response.text());
+        return null;
+      }
+
+      const data = await response.json();
+      console.log(`✅ Usuário encontrado: ID=${data.id}, Nome=${data.name}`);
+
+      return { id: data.id, cn: data.name }; // Retorna ID e nome
+    } catch (error) {
+      console.error('❌ Erro ao obter informações do usuário:', error);
+      return null;
+    }
+  };
+
+  const [certificate, setCertificate] = useState(null);
+  const handleGenerateCertificate = async () => {
+    try {
+      const userInfo = await fetchUserInfo();
+      if (!userInfo) {
+        console.error('❌ Não foi possível obter o ID do usuário.');
+        return;
+      }
+
+      const certData = await generateCertificate(userInfo.id, userInfo.cn); // Agora com ID real
 
       if (certData) {
         console.log('✅ Certificado gerado:', certData);
@@ -73,7 +109,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
       console.error('❌ Erro ao gerar certificado:', error);
       Alert.alert('Erro', 'Falha ao gerar certificado.');
     }
-  }
+  };
 
   const navigation = useNavigation();
 
@@ -209,23 +245,38 @@ export default function Assinatura({ route }: AssinaturaProps) {
     }
 
     try {
-      let token = await AsyncStorage.getItem('token'); // 🔥 Pegando token do AsyncStorage
+      console.log('📌 [1/5] Pegando token do usuário...');
+
+      // 🔥 Pegando o token diretamente do AsyncStorage
+      let token = await AsyncStorage.getItem('token');
       if (!token) {
         Alert.alert('Erro', 'Nenhum token encontrado. Faça login novamente.');
+        console.error('❌ [ERRO] Nenhum token armazenado.');
         return;
       }
 
-      // 🛑 Verifica se já temos um certificado
+      console.log('🔑 [1/5] Token obtido:', token);
+
+      // 🔹 Etapa 2: Verificar se já temos um certificado válido
+      console.log('📌 [2/5] Verificando se já temos um certificado...');
       if (!certificate) {
         console.warn('📜 Nenhum certificado encontrado. Gerando um novo...');
-        await handleGenerateCertificate();
-        if (!certificate) {
+        const newCert = await generateCertificate(userName);
+        if (!newCert) {
           Alert.alert('Erro', 'Falha ao gerar certificado antes da assinatura.');
+          console.error('❌ [ERRO] Não foi possível gerar um certificado.');
           return;
         }
+        setCertificate(newCert);
+        console.log('✅ [2/5] Novo certificado gerado com sucesso!');
+      } else {
+        console.log('✅ [2/5] Certificado já disponível!');
       }
 
-      console.log('🔑 Certificado pronto para uso:', certificate);
+      console.log('📜 Certificado atual:', certificate || '[Nenhum certificado armazenado]');
+
+      // 🔹 Etapa 3: Calcular posição da assinatura no PDF
+      console.log('📌 [3/5] Calculando posição da assinatura...');
 
       const xScreen = pan.x._value;
       const yScreen = pan.y._value;
@@ -233,6 +284,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
       const fracY = yScreen / displaySize.height;
       const pdfX = pdfDimensions.width * fracX;
       const pdfY = pdfDimensions.height * (1 - fracY);
+
+      console.log(`📍 [3/5] Assinatura posicionada em X=${pdfX}, Y=${pdfY}`);
+
+      // 🔹 Etapa 4: Criar FormData para envio do PDF
+      console.log('📌 [4/5] Preparando envio do PDF para assinatura...');
 
       const formData = new FormData();
       formData.append('file', {
@@ -244,7 +300,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
       formData.append('posY', JSON.stringify(pdfY));
       formData.append('pageNumber', JSON.stringify(1));
 
-      console.log('📤 Enviando PDF para API de assinatura...', formData);
+      console.log('📤 [4/5] Enviando PDF para API de assinatura...');
 
       const response = await fetch(`${API_SIGNATURE_BASE_URL}/api/pdf/signature`, {
         method: 'POST',
@@ -256,25 +312,25 @@ export default function Assinatura({ route }: AssinaturaProps) {
       });
 
       const responseText = await response.text();
-      console.log('📄 Resposta da API:', responseText || '[Resposta vazia]');
+      console.log('📄 [5/5] Resposta da API:', responseText || '[Resposta vazia]');
 
       if (!response.ok) {
-        console.error('❌ Erro ao assinar documento:', responseText);
+        console.error('❌ [ERRO] Falha ao assinar documento:', responseText);
         Alert.alert('Erro', 'Falha ao assinar o documento.');
         return;
       }
 
       const data = JSON.parse(responseText);
       if (data.filePath) {
-        console.log('✅ PDF assinado com sucesso:', data.filePath);
+        console.log('✅ PDF assinado com sucesso! Caminho:', data.filePath);
         setSignedPdfUri(data.filePath);
         Alert.alert('Sucesso', 'Documento assinado!');
       } else {
-        console.error('❌ Erro ao processar resposta:', data);
+        console.error('❌ [ERRO] Resposta inesperada da API:', data);
         Alert.alert('Erro', 'Falha ao processar resposta da API.');
       }
     } catch (error) {
-      console.error('❌ Erro ao assinar PDF:', error);
+      console.error('❌ [ERRO GERAL] Exceção ao assinar PDF:', error);
       Alert.alert('Erro', 'Falha ao assinar o documento.');
     }
   }
