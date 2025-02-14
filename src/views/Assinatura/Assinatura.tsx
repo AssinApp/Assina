@@ -1,5 +1,6 @@
 import * as DocumentPicker from 'expo-document-picker';
 import * as FileSystem from 'expo-file-system';
+import * as IntentLauncher from 'expo-intent-launcher';
 
 import {
   Alert,
@@ -28,6 +29,7 @@ import { API_BASE_URL } from '@env';
 import { API_SIGNATURE_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Pdf from 'react-native-pdf';
+import { Platform } from 'react-native';
 import { decodeJwtToken } from '../../services/certificateService'; // Importando corretamente
 import { generateCertificate } from '../../services/certificateService';
 import { jwtDecode } from 'jwt-decode';
@@ -473,6 +475,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
   /**
    * Baixar PDF assinado
    */
+
   async function handleDownload() {
     if (!signedPdfUri) {
       Alert.alert('Atenção', 'Nenhum PDF assinado disponível para baixar.');
@@ -480,12 +483,50 @@ export default function Assinatura({ route }: AssinaturaProps) {
     }
 
     try {
-      const fileUri = FileSystem.documentDirectory + 'pdf_assinado.pdf';
-      const { uri } = await FileSystem.downloadAsync(signedPdfUri, fileUri);
-      Alert.alert('Sucesso!', `Arquivo salvo em:\n${uri}`);
+      if (Platform.OS === 'android') {
+        // Solicita permissão para acessar o diretório
+        const permissions =
+          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+        if (!permissions.granted) {
+          Alert.alert(
+            'Permissão necessária',
+            'Você precisa permitir o acesso ao armazenamento para salvar o arquivo.',
+          );
+          return;
+        }
+
+        // Gera um nome único para o arquivo PDF assinado
+        const fileName = `pdf_assinado_${Date.now()}.pdf`;
+
+        // Converte o PDF assinado para base64
+        const pdfBase64 = await FileSystem.readAsStringAsync(signedPdfUri, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        // Cria o arquivo no diretório escolhido pelo usuário
+        const fileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+          permissions.directoryUri, // Diretório escolhido pelo usuário
+          fileName,
+          'application/pdf',
+        );
+
+        // Escreve o PDF no arquivo criado
+        await FileSystem.writeAsStringAsync(fileUri, pdfBase64, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        Alert.alert('Sucesso!', `Arquivo salvo com sucesso!\n\nCaminho: ${fileUri}`);
+      } else {
+        // Para iOS, salva no diretório padrão
+        const fileUri = FileSystem.documentDirectory + `pdf_assinado_${Date.now()}.pdf`;
+        await FileSystem.copyAsync({ from: signedPdfUri, to: fileUri });
+
+        Alert.alert('Sucesso!', `Arquivo salvo em:\n${fileUri}`);
+      }
     } catch (error) {
-      console.error('Erro ao baixar PDF:', error);
-      Alert.alert('Erro', 'Falha ao salvar arquivo');
+      console.error('❌ Erro ao baixar PDF:', error);
+      Alert.alert('Erro', 'Falha ao salvar arquivo.');
     }
   }
 
