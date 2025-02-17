@@ -17,11 +17,15 @@ export default function HomeAuth({ handleLogout }) {
   // Exemplo de Documentos Recentes
   const [recentDocuments, setRecentDocuments] = useState([]);
 
-  const loadSignedDocuments = async (user: string) => {
+  const loadSignedDocuments = async () => {
     try {
-      console.log('🔄 Carregando documentos assinados...');
+      const userId = await AsyncStorage.getItem('user_id'); // Obtém o ID do usuário logado
+      if (!userId) {
+        console.error('❌ ID do usuário não encontrado.');
+        return;
+      }
 
-      const savedDocs = await AsyncStorage.getItem(`signedDocuments_${user}`);
+      const savedDocs = await AsyncStorage.getItem(`signedDocuments_${userId}`);
       if (savedDocs) {
         const documents = JSON.parse(savedDocs);
         setRecentDocuments(documents);
@@ -39,7 +43,7 @@ export default function HomeAuth({ handleLogout }) {
         setPendingCount(0);
       }
     } catch (error) {
-      console.error('❌ Erro ao carregar documentos assinados:', error);
+      console.error('Erro ao carregar documentos assinados:', error);
     }
   };
 
@@ -53,7 +57,7 @@ export default function HomeAuth({ handleLogout }) {
         const data = await response.json();
         if (response.ok) {
           setUserName(data.name);
-          await loadSignedDocuments(data.name); // Carrega os documentos assinados
+          await loadSignedDocuments(); // Carrega os documentos assinados do usuário atual
         }
       }
     };

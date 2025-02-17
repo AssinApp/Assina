@@ -36,6 +36,10 @@ export default function Login({ navigation, setIsLoggedIn }: LoginScreenProps) {
       if (response.ok) {
         const userData = await response.json();
         console.log('[DEBUG] Payload do usuário:', userData); // Printando o payload no console
+
+        // Armazenando o ID do usuário no AsyncStorage
+        await AsyncStorage.setItem('user_id', userData.id.toString()); // Armazenando o ID
+
         return userData;
       } else {
         console.error('[ERROR] Falha ao obter dados do usuário');
@@ -65,12 +69,15 @@ export default function Login({ navigation, setIsLoggedIn }: LoginScreenProps) {
       if (response.ok) {
         await AsyncStorage.setItem('token', data.access_token);
 
-        // Buscar os dados do usuário e printar o payload
-        await fetchUserData(data.access_token);
+        // Buscar os dados do usuário e salvar o ID
+        await fetchUserData(data.access_token); // Isso agora vai salvar o ID do usuário
 
         if (setIsLoggedIn) {
           setIsLoggedIn(true);
         }
+
+        // Navegar para a próxima tela
+        navigation.navigate('Home'); // Ou a tela de destino após login
       } else {
         ToastAndroid.show('Credenciais inválidas!', ToastAndroid.SHORT);
       }

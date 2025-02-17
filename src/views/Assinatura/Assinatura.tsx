@@ -159,9 +159,15 @@ export default function Assinatura({ route }: AssinaturaProps) {
   const [documentTitle, setDocumentTitle] = useState<string | null>(null);
 
   // Salvar Assinatura como AsyncStorage
-  const saveSignedDocument = async (title: string, user: string) => {
+  const saveSignedDocument = async (title: string) => {
     try {
-      const existingDocs = await AsyncStorage.getItem(`signedDocuments_${user}`);
+      const userId = await AsyncStorage.getItem('user_id'); // Pega o ID do usuário
+      if (!userId) {
+        console.error('❌ ID do usuário não encontrado.');
+        return;
+      }
+
+      const existingDocs = await AsyncStorage.getItem(`signedDocuments_${userId}`);
       const documents = existingDocs ? JSON.parse(existingDocs) : [];
 
       const newDocument = {
@@ -171,11 +177,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
       };
 
       const updatedDocs = [newDocument, ...documents]; // Adiciona o mais recente no topo
-      await AsyncStorage.setItem(`signedDocuments_${user}`, JSON.stringify(updatedDocs));
+      await AsyncStorage.setItem(`signedDocuments_${userId}`, JSON.stringify(updatedDocs));
 
       console.log('✅ Documento assinado salvo:', newDocument);
     } catch (error) {
-      console.error('❌ Erro ao salvar documento assinado:', error);
+      console.error('Erro ao salvar documento assinado:', error);
     }
   };
 
