@@ -19,24 +19,27 @@ export default function HomeAuth({ handleLogout }) {
 
   const loadSignedDocuments = async (user: string) => {
     try {
+      console.log('🔄 Carregando documentos assinados...');
+
       const savedDocs = await AsyncStorage.getItem(`signedDocuments_${user}`);
       if (savedDocs) {
         const documents = JSON.parse(savedDocs);
         setRecentDocuments(documents);
 
-        // Contar quantos são assinados e quantos são pendentes
         const signedDocs = documents.filter(doc => doc.status === 'signed').length;
         const pendingDocs = documents.filter(doc => doc.status === 'pending').length;
 
         setSignedCount(signedDocs);
         setPendingCount(pendingDocs);
+
+        console.log('📄 Documentos carregados:', documents);
       } else {
         setRecentDocuments([]);
         setSignedCount(0);
         setPendingCount(0);
       }
     } catch (error) {
-      console.error('Erro ao carregar documentos assinados:', error);
+      console.error('❌ Erro ao carregar documentos assinados:', error);
     }
   };
 
@@ -50,7 +53,7 @@ export default function HomeAuth({ handleLogout }) {
         const data = await response.json();
         if (response.ok) {
           setUserName(data.name);
-          await loadSignedDocuments(data.name);
+          await loadSignedDocuments(data.name); // Carrega os documentos assinados
         }
       }
     };

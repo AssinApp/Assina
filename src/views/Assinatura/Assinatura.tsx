@@ -170,10 +170,12 @@ export default function Assinatura({ route }: AssinaturaProps) {
         date: new Date().toLocaleDateString(),
       };
 
-      const updatedDocs = [...documents, newDocument];
+      const updatedDocs = [newDocument, ...documents]; // Adiciona o mais recente no topo
       await AsyncStorage.setItem(`signedDocuments_${user}`, JSON.stringify(updatedDocs));
+
+      console.log('✅ Documento assinado salvo:', newDocument);
     } catch (error) {
-      console.error('Erro ao salvar documento assinado:', error);
+      console.error('❌ Erro ao salvar documento assinado:', error);
     }
   };
 
@@ -330,6 +332,14 @@ export default function Assinatura({ route }: AssinaturaProps) {
         // Atualiza o estado para exibir o PDF salvo
         setSignedPdfUri(signedPdfPath);
         Alert.alert('Sucesso', 'PDF assinado e salvo!');
+
+        // **Salvar no AsyncStorage**
+        if (documentTitle) {
+          await saveSignedDocument(documentTitle, userInfo.cn);
+        }
+
+        // **Redirecionar para HomeAuth**
+        navigation.navigate('HomeAuth', { refresh: true });
       };
     } catch (error) {
       console.error('❌ [ERRO] Exceção ao assinar PDF:', error);
@@ -417,10 +427,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
       Alert.alert('Sucesso', 'PDF assinado! (Veja a prévia abaixo)');
 
       if (documentTitle) {
-        await saveSignedDocument(documentTitle, userName);
+        await saveSignedDocument(documentTitle, userName); // Salva no AsyncStorage
       }
 
-      // Salvar documento assinado no AsyncStorage
+      // Navega de volta para a HomeAuth e força atualização
+      navigation.navigate('HomeAuth', { refresh: true });
     } catch (err) {
       console.error(err);
       Alert.alert('Erro', 'Falha ao assinar PDF');
