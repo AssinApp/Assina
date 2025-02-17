@@ -253,7 +253,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
     }
   }
 
-  async function sendPdfToSign(selectedPdf, certificate) {
+  async function sendPdfToSign(selectedPdf, pdfX, pdfY) {
     if (!selectedPdf) {
       Alert.alert('Erro', 'Selecione um arquivo primeiro!');
       return;
@@ -277,28 +277,15 @@ export default function Assinatura({ route }: AssinaturaProps) {
 
       console.log(`🔑 [1/5] ID do usuário: ${userInfo.id}, Nome: ${userInfo.cn}`);
 
-      // Verificar se já temos um certificado válido
-      if (!certificate) {
-        console.warn('📜 Nenhum certificado encontrado. Gerando um novo...');
-        certificate = await generateCertificate(userInfo);
-        if (!certificate) {
-          Alert.alert('Erro', 'Falha ao gerar certificado antes da assinatura.');
-          return;
-        }
-        console.log('✅ Certificado gerado com sucesso!');
-      } else {
-        console.log('✅ Certificado já disponível!');
-      }
-
-      // Criar FormData para envio do PDF
+      // Criar FormData para envio do PDF com coordenadas dinâmicas
       const formData = new FormData();
       formData.append('file', {
         uri: selectedPdf,
         name: 'document.pdf',
         type: 'application/pdf',
       });
-      formData.append('posX', '100');
-      formData.append('posY', '200');
+      formData.append('posX', pdfX.toString()); // Enviar as coordenadas de X
+      formData.append('posY', pdfY.toString()); // Enviar as coordenadas de Y
       formData.append('pageNumber', '1');
       formData.append('userId', userInfo.id);
 
@@ -323,6 +310,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
       const pdfBlob = await response.blob();
       const reader = new FileReader();
       reader.readAsDataURL(pdfBlob);
+
       reader.onloadend = async () => {
         const base64data = reader.result.split(',')[1]; // Pega apenas a parte base64
 
@@ -345,7 +333,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
         }
 
         // **Redirecionar para HomeAuth**
-        navigation.navigate('HomeAuth', { refresh: true });
+        //navigation.navigate('HomeAuth', { refresh: true });
       };
     } catch (error) {
       console.error('❌ [ERRO] Exceção ao assinar PDF:', error);
@@ -423,9 +411,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
     const fracX = xScreen / displaySize.width;
     const fracY = yScreen / displaySize.height;
 
-    // Converte para coords no PDF (inverte Y)
+    // Converte para coordenadas no PDF (inverte Y)
     const pdfX = pdfDimensions.width * fracX;
     const pdfY = pdfDimensions.height * (1 - fracY);
+
+    console.log(`📍 Coordenadas de assinatura (PDF): X=${pdfX}, Y=${pdfY}`);
 
     try {
       const newPdfUri = await signPdf(selectedPdf, pdfX, pdfY, `Assinado por: ${userName}`);
@@ -436,8 +426,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
         await saveSignedDocument(documentTitle, userName); // Salva no AsyncStorage
       }
 
+      // Agora, envia as coordenadas para a API de assinatura
+      await sendPdfToSign(selectedPdf, pdfX, pdfY);
+
       // Navega de volta para a HomeAuth e força atualização
-      navigation.navigate('HomeAuth', { refresh: true });
+      //navigation.navigate('HomeAuth', { refresh: true });
     } catch (err) {
       console.error(err);
       Alert.alert('Erro', 'Falha ao assinar PDF');
@@ -705,9 +698,10 @@ export default function Assinatura({ route }: AssinaturaProps) {
               <View style={styles.signatureActions}>
                 <TouchableOpacity
                   style={styles.signatureButton}
-                  onPress={() => sendPdfToSign(selectedPdf, certificate)}>
+                  onPress={handlePositionSignature} // Alteração aqui, chama a função que trata a posição
+                >
                   <PenTool size={20} color="#FFF" />
-                  <Text style={styles.signatureButtonText}>Enviar para Assinatura</Text>
+                  <Text style={styles.signatureButtonText}>Posicionar Assinatura</Text>
                 </TouchableOpacity>
               </View>
             )}
