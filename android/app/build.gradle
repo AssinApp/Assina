@@ -101,10 +101,13 @@ android {
     namespace 'com.watarumaeda.react_native_boilerplate.dev'
     defaultConfig {
         applicationId 'com.watarumaeda.react_native_boilerplate.dev'
-        minSdkVersion rootProject.ext.minSdkVersion
+        minSdkVersion 24
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86", "x86_64"
+        }
     }
     signingConfigs {
         debug {

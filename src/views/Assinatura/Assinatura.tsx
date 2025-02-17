@@ -25,8 +25,6 @@ import {
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import React, { useRef, useState } from 'react';
 
-import { API_BASE_URL } from '@env';
-import { API_SIGNATURE_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Pdf from 'react-native-pdf';
 import { Platform } from 'react-native';
@@ -34,6 +32,9 @@ import { decodeJwtToken } from '../../services/certificateService'; // Importand
 import { generateCertificate } from '../../services/certificateService';
 import { jwtDecode } from 'jwt-decode';
 import { useNavigation } from '@react-navigation/native';
+
+//import { API_BASE_URL } from '@env';
+//import { API_SIGNATURE_BASE_URL } from '@env';
 
 interface AssinaturaProps {
   route?: {
@@ -44,6 +45,9 @@ interface AssinaturaProps {
 }
 
 export default function Assinatura({ route }: AssinaturaProps) {
+  const API_SIGNATURE_BASE_URL = 'https://fcte.john.pro.br/unb-sign-api';
+
+  const API_BASE_URL = 'https://assinapp.com.br';
   const getUserInfo = async () => {
     try {
       const userId = await AsyncStorage.getItem('user_id');

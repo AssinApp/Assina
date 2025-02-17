@@ -11,9 +11,10 @@ import {
 } from 'react-native';
 import React, { useState } from 'react';
 
-import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { colors } from '@/theme';
+
+const API_BASE_URL = 'https://assinapp.com.br';
 
 // Tipo mínimo para as props:
 type LoginScreenProps = {
@@ -50,11 +51,14 @@ export default function Login({ navigation, setIsLoggedIn }: LoginScreenProps) {
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/token/`, {
+      const response = await fetch(`${API_BASE_URL}/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`,
       });
+
+      console.log('Resposta:', response);
+
       const data = await response.json();
       console.log('Resposta do servidor:', data);
 

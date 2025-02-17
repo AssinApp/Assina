@@ -1,10 +1,14 @@
-import { API_SIGNATURE_BASE_URL } from "@env";
+//import { API_SIGNATURE_BASE_URL } from "@env";
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
 /**
  * Decodifica um JWT para extrair informações do payload.
  */
+
+const API_SIGNATURE_BASE_URL = 'https://fcte.john.pro.br/unb-sign-api';
+
 export const decodeJwtToken = (token) => {
     try {
       const base64Url = token.split(".")[1]; // Pegamos apenas o payload

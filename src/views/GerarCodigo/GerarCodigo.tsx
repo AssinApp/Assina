@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
-import { API_BASE_URL } from '@env';
 import axios from 'axios';
+
+const API_BASE_URL = 'https://assinapp.com.br';
 
 // URL base para requisições
 const baseURL = `${API_BASE_URL}`;

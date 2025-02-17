@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, ToastAndroid, TouchableOpacity, View } from 'react-native';
 
-import { API_BASE_URL } from '@env';
 import { StackProps } from '@/navigator/stack';
 import { colors } from '@/theme';
+
+const API_BASE_URL = 'https://assinapp.com.br';
 
 export default function Cadastro({ navigation }: StackProps) {
   const [name, setName] = useState('');

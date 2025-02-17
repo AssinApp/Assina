@@ -52,6 +52,21 @@
       "env": {
         "APP_ENV": "prod"
       }
+    },
+    "preview": {  
+      "extends": "base",
+      "channel": "preview",
+      "distribution": "internal",
+      "env": {
+        "APP_ENV": "preview"
+      },
+      "android": {
+        "gradleCommand": ":app:assembleRelease"
+      },
+      "ios": {
+        "simulator": true,
+        "buildConfiguration": "Release"
+      }
     }
   },
   "submit": {

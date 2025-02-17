@@ -1,8 +1,11 @@
 import * as DocumentPicker from 'expo-document-picker';
 
-import { API_SIGNATURE_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+
+const API_SIGNATURE_BASE_URL= 'https://fcte.john.pro.br/unb-sign-api';
+
+
 
 // Usando a API de assinatura
 

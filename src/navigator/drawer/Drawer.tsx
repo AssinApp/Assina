@@ -2,11 +2,12 @@ import { Alert, Image, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } 
 import { DrawerActions, StackActions, useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 
-import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import HistoricoAssinaturas from '@/views/Historico';
 import HomeAuth from '@/views/HomeAuth';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+
+const API_BASE_URL = 'https://assinapp.com.br';
 
 const Drawer = createDrawerNavigator();
 

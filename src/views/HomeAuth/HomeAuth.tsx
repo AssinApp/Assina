@@ -3,10 +3,11 @@ import { DrawerActions, StackActions } from '@react-navigation/native';
 import { FlatList, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
 
-import { API_BASE_URL } from '@env';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/Feather';
 import { useNavigation } from '@react-navigation/native';
+
+const API_BASE_URL = 'https://assinapp.com.br';
 
 export default function HomeAuth({ handleLogout }) {
   const [userName, setUserName] = useState('João Silva');
