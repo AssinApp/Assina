@@ -104,7 +104,8 @@ export default function Assinatura({ route }: AssinaturaProps) {
         return;
       }
 
-      const certData = await generateCertificate(userInfo.id, userInfo.cn); // Agora com ID real
+      console.log('📜 Gerando certificado para:', userInfo);
+      const certData = await generateCertificate(userInfo); // 🔥 Corrigido aqui
 
       if (certData) {
         console.log('✅ Certificado gerado:', certData);
@@ -159,7 +160,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
   const [documentTitle, setDocumentTitle] = useState<string | null>(null);
 
   // Salvar Assinatura como AsyncStorage
-  const saveSignedDocument = async (title: string, status: string) => {
+  const saveSignedDocument = async (title, status) => {
     try {
       const userId = await AsyncStorage.getItem('user_id');
       if (!userId) {
@@ -167,9 +168,10 @@ export default function Assinatura({ route }: AssinaturaProps) {
         return;
       }
 
-      // Só salvar documentos assinados com sucesso
+      console.log(`🔍 Verificando status do documento: "${status}"`);
+
       if (status !== 'signed') {
-        console.warn('⚠️ Documento NÃO foi assinado. Não será salvo no AsyncStorage.');
+        console.warn(`⚠️ Documento NÃO foi assinado. Status recebido: "${status}"`);
         return;
       }
 
@@ -266,7 +268,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
     }
 
     try {
-      console.log('📌 [1/5] Pegando token do usuário...');
+      console.log('📌 [1/6] Pegando token do usuário...');
       let token = await AsyncStorage.getItem('token');
 
       if (!token) {
@@ -281,7 +283,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
         return;
       }
 
-      console.log(`🔑 [1/5] ID do usuário: ${userInfo.id}, Nome: ${userInfo.cn}`);
+      console.log(`🔑 [2/6] ID do usuário: ${userInfo.id}, Nome: ${userInfo.cn}`);
+
+      // 🔥 **Garantir que o certificado está gerado antes de continuar**
+      console.log('📜 [3/6] Gerando certificado antes da assinatura...');
+      await handleGenerateCertificate();
 
       // Criar FormData para envio do PDF com coordenadas dinâmicas
       const formData = new FormData();
@@ -295,7 +301,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
       formData.append('pageNumber', '1');
       formData.append('userId', userInfo.id);
 
-      console.log('📤 [3/5] Enviando PDF para API de assinatura...');
+      console.log('📤 [4/6] Enviando PDF para API de assinatura...');
 
       const response = await fetch(`${API_SIGNATURE_BASE_URL}/api/pdf/signature`, {
         method: 'POST',
@@ -304,12 +310,12 @@ export default function Assinatura({ route }: AssinaturaProps) {
       });
 
       if (!response.ok) {
-        console.error('❌ Erro ao assinar o PDF:', await response.text());
+        console.error('❌ [ERRO] Falha ao assinar o PDF:', await response.text());
         Alert.alert('Erro', 'Falha ao assinar documento.');
         return;
       }
 
-      console.log('✅ PDF assinado com sucesso!');
+      console.log('✅ [5/6] PDF assinado com sucesso!');
 
       // **Agora só salva se for assinado corretamente**
       await saveSignedDocument(documentTitle, 'signed');
@@ -330,7 +336,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
             encoding: FileSystem.EncodingType.Base64,
           });
 
-          console.log('✅ PDF assinado salvo:', signedPdfPath);
+          console.log('✅ [6/6] PDF assinado salvo:', signedPdfPath);
 
           // Atualiza o estado para exibir o PDF salvo
           setSignedPdfUri(signedPdfPath);
