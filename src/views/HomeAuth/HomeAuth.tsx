@@ -19,7 +19,7 @@ export default function HomeAuth({ handleLogout }) {
 
   const loadSignedDocuments = async () => {
     try {
-      const userId = await AsyncStorage.getItem('user_id'); // Obtém o ID do usuário logado
+      const userId = await AsyncStorage.getItem('user_id');
       if (!userId) {
         console.error('❌ ID do usuário não encontrado.');
         return;
@@ -27,23 +27,18 @@ export default function HomeAuth({ handleLogout }) {
 
       const savedDocs = await AsyncStorage.getItem(`signedDocuments_${userId}`);
       if (savedDocs) {
-        const documents = JSON.parse(savedDocs);
-        setRecentDocuments(documents);
+        let documents = JSON.parse(savedDocs);
 
-        const signedDocs = documents.filter(doc => doc.status === 'signed').length;
-        const pendingDocs = documents.filter(doc => doc.status === 'pending').length;
+        // 🔥 Filtrar documentos para remover aqueles que não foram assinados corretamente
+        const filteredDocuments = documents.filter(doc => doc.status === 'signed');
 
-        setSignedCount(signedDocs);
-        setPendingCount(pendingDocs);
-
-        console.log('📄 Documentos carregados:', documents);
+        setRecentDocuments(filteredDocuments);
+        console.log('📄 Documentos assinados carregados:', filteredDocuments);
       } else {
         setRecentDocuments([]);
-        setSignedCount(0);
-        setPendingCount(0);
       }
     } catch (error) {
-      console.error('Erro ao carregar documentos assinados:', error);
+      console.error('❌ Erro ao carregar documentos assinados:', error);
     }
   };
 

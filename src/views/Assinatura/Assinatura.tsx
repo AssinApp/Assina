@@ -159,11 +159,17 @@ export default function Assinatura({ route }: AssinaturaProps) {
   const [documentTitle, setDocumentTitle] = useState<string | null>(null);
 
   // Salvar Assinatura como AsyncStorage
-  const saveSignedDocument = async (title: string) => {
+  const saveSignedDocument = async (title: string, status: string) => {
     try {
-      const userId = await AsyncStorage.getItem('user_id'); // Pega o ID do usuário
+      const userId = await AsyncStorage.getItem('user_id');
       if (!userId) {
         console.error('❌ ID do usuário não encontrado.');
+        return;
+      }
+
+      // Só salvar documentos assinados com sucesso
+      if (status !== 'signed') {
+        console.warn('⚠️ Documento NÃO foi assinado. Não será salvo no AsyncStorage.');
         return;
       }
 
@@ -172,16 +178,16 @@ export default function Assinatura({ route }: AssinaturaProps) {
 
       const newDocument = {
         title,
-        status: 'signed',
+        status,
         date: new Date().toLocaleDateString(),
       };
 
-      const updatedDocs = [newDocument, ...documents]; // Adiciona o mais recente no topo
+      const updatedDocs = [newDocument, ...documents];
       await AsyncStorage.setItem(`signedDocuments_${userId}`, JSON.stringify(updatedDocs));
 
       console.log('✅ Documento assinado salvo:', newDocument);
     } catch (error) {
-      console.error('Erro ao salvar documento assinado:', error);
+      console.error('❌ Erro ao salvar documento assinado:', error);
     }
   };
 
@@ -293,10 +299,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
 
       const response = await fetch(`${API_SIGNATURE_BASE_URL}/api/pdf/signature`, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/pdf', // Mudança para garantir a resposta correta
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
@@ -305,6 +308,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
         Alert.alert('Erro', 'Falha ao assinar documento.');
         return;
       }
+
+      console.log('✅ PDF assinado com sucesso!');
+
+      // **Agora só salva se for assinado corretamente**
+      await saveSignedDocument(documentTitle, 'signed');
 
       // Convertendo a resposta binária para base64
       const pdfBlob = await response.blob();
@@ -317,23 +325,25 @@ export default function Assinatura({ route }: AssinaturaProps) {
         // Criando o caminho para salvar o PDF assinado
         const signedPdfPath = FileSystem.documentDirectory + `pdf_assinado_${Date.now()}.pdf`;
 
-        await FileSystem.writeAsStringAsync(signedPdfPath, base64data, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
+        try {
+          await FileSystem.writeAsStringAsync(signedPdfPath, base64data, {
+            encoding: FileSystem.EncodingType.Base64,
+          });
 
-        console.log('✅ PDF assinado salvo:', signedPdfPath);
+          console.log('✅ PDF assinado salvo:', signedPdfPath);
 
-        // Atualiza o estado para exibir o PDF salvo
-        setSignedPdfUri(signedPdfPath);
-        Alert.alert('Sucesso', 'PDF assinado e salvo!');
+          // Atualiza o estado para exibir o PDF salvo
+          setSignedPdfUri(signedPdfPath);
+          Alert.alert('Sucesso', 'PDF assinado e salvo!');
 
-        // **Salvar no AsyncStorage**
-        if (documentTitle) {
-          await saveSignedDocument(documentTitle, userInfo.cn);
+          // **Salvar no AsyncStorage**
+          if (documentTitle) {
+            await saveSignedDocument(documentTitle, userInfo.cn);
+          }
+        } catch (saveError) {
+          console.error('❌ Erro ao salvar PDF assinado:', saveError);
+          Alert.alert('Erro', 'Falha ao salvar o documento assinado.');
         }
-
-        // **Redirecionar para HomeAuth**
-        //navigation.navigate('HomeAuth', { refresh: true });
       };
     } catch (error) {
       console.error('❌ [ERRO] Exceção ao assinar PDF:', error);
