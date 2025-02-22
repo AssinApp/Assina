@@ -1,10 +1,28 @@
 import { Bell, FileSignature, Home, LogOut, Sparkles, Target, User } from 'lucide-react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import React from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CustomDrawerContent(props) {
+  const [userName, setUserName] = useState('Usuário');
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const storedName = await AsyncStorage.getItem('user_name');
+        if (storedName) {
+          setUserName(storedName);
+        }
+      } catch (error) {
+        console.error('❌ Erro ao buscar o nome do usuário:', error);
+      }
+    };
+
+    fetchUserName();
+  }, []);
+
   async function handleLogout() {
     props.setIsLoggedIn(false);
   }
@@ -20,7 +38,7 @@ export default function CustomDrawerContent(props) {
           <View style={styles.avatar}>
             <User size={32} color="#2563EB" />
           </View>
-          <Text style={styles.name}>João Silva</Text>
+          <Text style={styles.name}>Olá</Text>
         </View>
       </View>
 
