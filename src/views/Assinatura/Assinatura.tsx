@@ -26,6 +26,7 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import React, { useRef, useState } from 'react';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Buffer } from 'buffer'; // Import necessário para conversão
 import Pdf from 'react-native-pdf';
 import { Platform } from 'react-native';
 import { decodeJwtToken } from '../../services/certificateService'; // Importando corretamente
@@ -165,13 +166,6 @@ export default function Assinatura({ route }: AssinaturaProps) {
       const userId = await AsyncStorage.getItem('user_id');
       if (!userId) {
         console.error('❌ ID do usuário não encontrado.');
-        return;
-      }
-
-      console.log(`🔍 Verificando status do documento: "${status}"`);
-
-      if (status !== 'signed') {
-        console.warn(`⚠️ Documento NÃO foi assinado. Status recebido: "${status}"`);
         return;
       }
 
@@ -458,16 +452,17 @@ export default function Assinatura({ route }: AssinaturaProps) {
    */
   async function signPdf(pdfUri: string, xPos: number, yPos: number, text: string) {
     try {
-      const pdfBase64 = await FileSystem.readAsStringAsync(pdfUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      const pdfBytes = Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0));
+      console.log(`📌 Iniciando assinatura no PDF: ${pdfUri}`);
+
+      // ⬇️ Ler o PDF diretamente do URI sem conversão para Base64
+      const response = await fetch(pdfUri);
+      const pdfBytes = await response.arrayBuffer();
       const pdfDoc = await PDFDocument.load(pdfBytes);
 
       const firstPage = pdfDoc.getPages()[0];
       const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-      // Apenas um retângulo simples para demarcar a assinatura
+      // Desenhar um retângulo ao redor da assinatura
       firstPage.drawRectangle({
         x: xPos - 50,
         y: yPos - 20,
@@ -487,17 +482,25 @@ export default function Assinatura({ route }: AssinaturaProps) {
         color: rgb(0, 0, 1),
       });
 
+      // ⬇️ Salvar PDF como bytes
       const modifiedPdfBytes = await pdfDoc.save();
-      const modifiedPdfBase64 = btoa(String.fromCharCode(...new Uint8Array(modifiedPdfBytes)));
 
+      // ⚠️ **Conversão correta para Base64**
+      const base64Pdf = Buffer.from(modifiedPdfBytes).toString('base64');
+
+      // Criar um novo caminho para salvar o PDF assinado
       const newPdfUri = FileSystem.documentDirectory + `pdf-assinado-${Date.now()}.pdf`;
-      await FileSystem.writeAsStringAsync(newPdfUri, modifiedPdfBase64, {
-        encoding: FileSystem.EncodingType.Base64,
+
+      // Escrever no sistema de arquivos
+      await FileSystem.writeAsStringAsync(newPdfUri, base64Pdf, {
+        encoding: FileSystem.EncodingType.Base64, // Certificar que está salvando corretamente
       });
+
+      console.log(`✅ PDF assinado salvo em: ${newPdfUri}`);
 
       return newPdfUri;
     } catch (error) {
-      console.error('Erro ao assinar PDF:', error);
+      console.error('❌ Erro ao assinar PDF:', error);
       throw error;
     }
   }
