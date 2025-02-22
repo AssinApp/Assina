@@ -49,6 +49,10 @@ export default function Assinatura({ route }: AssinaturaProps) {
   const API_SIGNATURE_BASE_URL = 'https://fcte.john.pro.br/unb-sign-api';
 
   const API_BASE_URL = 'https://assinapp.com.br';
+
+  const [scale, setScale] = useState(1.0); // Estado para zoom
+  const [rotation, setRotation] = useState(0); // Estado para rotação
+
   const getUserInfo = async () => {
     try {
       const userId = await AsyncStorage.getItem('user_id');
@@ -637,31 +641,43 @@ export default function Assinatura({ route }: AssinaturaProps) {
           // Se já temos PDF selecionado, exibe viewer + toolbar
           <>
             {/* Barra de ferramentas do PDF */}
-            <View style={styles.viewerToolbar}>
-              <View style={styles.viewerToolbarLeft}>
-                {/* Ícones apenas demonstrativos (zoom, etc.) */}
+            {signedPdfUri && (
+              <View style={styles.viewerToolbar}>
+                <View style={styles.viewerToolbarLeft}>
+                  {/* Botão Zoom In */}
+                  <TouchableOpacity
+                    style={styles.toolbarButton}
+                    onPress={() => setScale(prev => Math.min(prev + 0.2, 3.0))} // Zoom até 3x
+                  >
+                    <ZoomIn size={20} color="#6B7280" />
+                  </TouchableOpacity>
+
+                  {/* Botão Zoom Out */}
+                  <TouchableOpacity
+                    style={styles.toolbarButton}
+                    onPress={() => setScale(prev => Math.max(prev - 0.2, 0.5))} // Zoom mínimo de 0.5x
+                  >
+                    <ZoomOut size={20} color="#6B7280" />
+                  </TouchableOpacity>
+
+                  {/* Botão Rotacionar */}
+                  <TouchableOpacity
+                    style={styles.toolbarButton}
+                    onPress={() => setRotation(prev => (prev + 90) % 360)} // Rotaciona 90° por vez
+                  >
+                    <RotateCw size={20} color="#6B7280" />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Botão Maximizar */}
                 <TouchableOpacity
                   style={styles.toolbarButton}
-                  onPress={() => Alert.alert('Zoom In')}>
-                  <ZoomIn size={20} color="#6B7280" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.toolbarButton}
-                  onPress={() => Alert.alert('Zoom Out')}>
-                  <ZoomOut size={20} color="#6B7280" />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.toolbarButton}
-                  onPress={() => Alert.alert('Rotacionar')}>
-                  <RotateCw size={20} color="#6B7280" />
+                  onPress={() => setScale(1.0)} // Reseta zoom ao normal
+                >
+                  <Maximize2 size={20} color="#6B7280" />
                 </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={styles.toolbarButton}
-                onPress={() => Alert.alert('Maximizar')}>
-                <Maximize2 size={20} color="#6B7280" />
-              </TouchableOpacity>
-            </View>
+            )}
 
             {/* Visualização do PDF */}
             <View style={styles.pdfViewer}>
@@ -702,11 +718,13 @@ export default function Assinatura({ route }: AssinaturaProps) {
               {signedPdfUri && (
                 <View style={styles.pdfContainer}>
                   <Pdf
-                    key={key + '-signed'}
-                    source={{ uri: signedPdfUri }}
-                    style={{ flex: 1 }}
-                    pointerEvents="none"
-                    onError={err => console.error('Erro no PDF assinado:', err)}
+                    key={key}
+                    source={{ uri: selectedPdf }}
+                    style={{
+                      flex: 1,
+                      transform: [{ scale }, { rotate: `${rotation}deg` }], // Aplica zoom e rotação
+                    }}
+                    onError={error => console.error('Erro no PDF:', error)}
                   />
                 </View>
               )}
@@ -733,9 +751,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
                     <Text style={styles.downloadButtonText}>Baixar Documento</Text>
                   </TouchableOpacity>
                   {/* Botão "Compartilhar" */}
+                  {/*
                   <TouchableOpacity style={styles.shareButton} onPress={handleShare}>
                     <Text style={styles.shareButtonText}>Compartilhar</Text>
                   </TouchableOpacity>
+                  */}
                 </View>
               </View>
             )}
