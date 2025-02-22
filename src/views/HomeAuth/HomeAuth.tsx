@@ -124,22 +124,18 @@ export default function HomeAuth({ handleLogout }) {
       <View style={styles.documentsSection}>
         <Text style={styles.sectionTitle}>Documentos Recentes</Text>
         <FlatList
-          data={recentDocuments}
+          data={recentDocuments.filter(doc => doc.status?.toLowerCase() === 'signed')}
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <View style={styles.documentCard}>
               <View>
-                <Text style={styles.documentTitle}>{item.title}</Text>
+                <Text style={styles.documentTitle}>
+                  {item.title.length > 45 ? item.title.substring(0, 45) + '...' : item.title}
+                </Text>
                 <Text style={styles.documentDate}>{item.date}</Text>
               </View>
-              <View
-                style={[
-                  styles.statusBadge,
-                  item.status === 'signed' ? styles.signed : styles.pending,
-                ]}>
-                <Text style={styles.statusText}>
-                  {item.status === 'signed' ? 'Assinado' : 'Pendente'}
-                </Text>
+              <View style={[styles.statusBadge, styles.signed]}>
+                <Text style={styles.statusText}>Assinado</Text>
               </View>
             </View>
           )}

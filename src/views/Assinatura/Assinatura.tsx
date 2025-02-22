@@ -176,16 +176,19 @@ export default function Assinatura({ route }: AssinaturaProps) {
       const existingDocs = await AsyncStorage.getItem(`signedDocuments_${userId}`);
       const documents = existingDocs ? JSON.parse(existingDocs) : [];
 
+      // ✅ Garante que o status será sempre salvo corretamente
+      const normalizedStatus = status.toLowerCase() === 'signed' ? 'signed' : 'pending';
+
       const newDocument = {
         title,
-        status,
+        status: normalizedStatus, // 🔥 Corrigido
         date: new Date().toLocaleDateString(),
       };
 
       const updatedDocs = [newDocument, ...documents];
       await AsyncStorage.setItem(`signedDocuments_${userId}`, JSON.stringify(updatedDocs));
 
-      console.log('✅ Documento assinado salvo:', newDocument);
+      console.log('✅ Documento salvo corretamente:', newDocument);
     } catch (error) {
       console.error('❌ Erro ao salvar documento assinado:', error);
     }
