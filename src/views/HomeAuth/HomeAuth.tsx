@@ -19,7 +19,7 @@ export default function HomeAuth({ handleLogout }) {
 
   const loadSignedDocuments = async () => {
     try {
-      const userId = await AsyncStorage.getItem('user_id'); // Obtém o ID do usuário logado
+      const userId = await AsyncStorage.getItem('user_id');
       if (!userId) {
         console.error('❌ ID do usuário não encontrado.');
         return;
@@ -28,13 +28,14 @@ export default function HomeAuth({ handleLogout }) {
       const savedDocs = await AsyncStorage.getItem(`signedDocuments_${userId}`);
       if (savedDocs) {
         const documents = JSON.parse(savedDocs);
+
+        // Filtragem corrigida
+        const signedDocs = documents.filter(doc => doc.status?.toLowerCase() === 'signed');
+        const pendingDocs = documents.filter(doc => doc.status?.toLowerCase() === 'pending');
+
         setRecentDocuments(documents);
-
-        const signedDocs = documents.filter(doc => doc.status === 'signed').length;
-        const pendingDocs = documents.filter(doc => doc.status === 'pending').length;
-
-        setSignedCount(signedDocs);
-        setPendingCount(pendingDocs);
+        setSignedCount(signedDocs.length);
+        setPendingCount(pendingDocs.length);
 
         console.log('📄 Documentos carregados:', documents);
       } else {
@@ -139,6 +140,7 @@ export default function HomeAuth({ handleLogout }) {
               </View>
             </View>
           )}
+          contentContainerStyle={{ paddingBottom: 20 }}
         />
       </View>
 
@@ -183,7 +185,7 @@ const styles = StyleSheet.create({
   },
   statText: { fontSize: 22, fontWeight: 'bold', marginTop: 5 },
   statLabel: { fontSize: 14, color: '#555' },
-  documentsSection: { padding: 20 },
+  documentsSection: { padding: 20, flex: 1 },
   sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
   documentCard: {
     backgroundColor: 'white',

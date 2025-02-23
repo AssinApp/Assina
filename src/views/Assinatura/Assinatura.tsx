@@ -176,12 +176,29 @@ export default function Assinatura({ route }: AssinaturaProps) {
       const existingDocs = await AsyncStorage.getItem(`signedDocuments_${userId}`);
       const documents = existingDocs ? JSON.parse(existingDocs) : [];
 
-      // ✅ Garante que o status será sempre salvo corretamente
-      const normalizedStatus = status.toLowerCase() === 'signed' ? 'signed' : 'pending';
+      // ✅ Evita adicionar mais de um "pending" antes de assinar
+      if (status === 'pending') {
+        const alreadyPending = documents.some(
+          doc => doc.title === title && doc.status === 'pending',
+        );
+        if (alreadyPending) {
+          console.warn(`⚠️ Documento '${title}' já está como 'pending'. Ignorando duplicação.`);
+          return;
+        }
+      }
+
+      // ✅ Evita adicionar mais de um "signed"
+      if (status === 'signed') {
+        const alreadySigned = documents.some(doc => doc.title === title && doc.status === 'signed');
+        if (alreadySigned) {
+          console.warn(`⚠️ Documento '${title}' já está como 'signed'. Ignorando duplicação.`);
+          return;
+        }
+      }
 
       const newDocument = {
         title,
-        status: normalizedStatus, // 🔥 Corrigido
+        status,
         date: new Date().toLocaleDateString(),
       };
 
