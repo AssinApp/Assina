@@ -57,43 +57,25 @@ export default function CustomDrawerContent(props) {
 
         {/* Divider abaixo de "Assinar" */}
         <View style={styles.divider} />
+
+        {/* Estatísticas - MOVIDO PARA LOGO ABAIXO DO DIVIDER */}
+        <View style={styles.statsContainer}>
+          {/* Economia de Papel */}
+          <View style={[styles.statItem, { backgroundColor: '#D1FAE5' }]}>
+            <Sparkles size={20} color="#047857" />
+            <Text style={styles.statText}>Economia de Papel</Text>
+          </View>
+
+          {/* Tempo Economizado */}
+          <View style={[styles.statItem, { backgroundColor: '#DBEAFE' }]}>
+            <Bell size={20} color="#1E40AF" />
+            <Text style={styles.statText}>Tempo Economizado</Text>
+          </View>
+        </View>
       </DrawerContentScrollView>
-
-      {/* Estatísticas organizadas verticalmente */}
-      <View style={styles.statsContainer}>
-        {/* Meta Mensal */}
-        <View style={styles.goalContainer}>
-          <View style={styles.goalHeader}>
-            <Target size={20} color="#2563EB" />
-            <Text style={styles.goalTitle}>Meta Mensal</Text>
-          </View>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: '75%' }]} />
-          </View>
-          <Text style={styles.goalText}>75/100 assinaturas</Text>
-        </View>
-
-        {/* Economia de Papel */}
-        <View style={[styles.statItem, { backgroundColor: '#D1FAE5' }]}>
-          <Sparkles size={20} color="#047857" />
-          <Text style={styles.statText}>Economia de Papel</Text>
-        </View>
-
-        {/* Tempo Economizado */}
-        <View style={[styles.statItem, { backgroundColor: '#DBEAFE' }]}>
-          <Bell size={20} color="#1E40AF" />
-          <Text style={styles.statText}>Tempo Economizado</Text>
-        </View>
-      </View>
 
       {/* Espaço em branco */}
       <View style={{ flex: 1 }} />
-
-      {/* Botão de Logout */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <LogOut size={20} color="red" />
-        <Text style={styles.logoutText}>Sair</Text>
-      </TouchableOpacity>
     </View>
   );
 }
@@ -141,41 +123,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
   },
   statsContainer: {
-    padding: 15,
-  },
-  goalContainer: {
-    backgroundColor: '#F8FAFC',
-    padding: 15,
-    borderRadius: 10,
-    marginBottom: 15,
-  },
-  goalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  goalTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 8,
-    color: '#1E40AF',
-  },
-  progressBar: {
-    width: '100%',
-    height: 6,
-    backgroundColor: '#CBD5E1',
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: '#2563EB',
-  },
-  goalText: {
-    fontSize: 12,
-    color: '#4B5563',
-    marginTop: 5,
-    textAlign: 'center',
+    paddingHorizontal: 15,
+    paddingTop: 10, // Adiciona um pequeno espaçamento após o divider
   },
   statItem: {
     flexDirection: 'row',
@@ -189,17 +138,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginLeft: 8,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  logoutText: {
-    color: 'red',
-    fontSize: 16,
-    marginLeft: 10,
   },
 });
