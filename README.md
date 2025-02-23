@@ -8,6 +8,15 @@
 
 O **AssinApp** é um aplicativo móvel para assinatura digital de documentos. O objetivo é proporcionar uma experiência intuitiva e segura para usuários que precisam assinar documentos de forma eletrônica.
 
+<p align="center">
+  <img src="./assets/Homepage.jpeg" alt="Imagem Homepage" width="300" />
+</p>
+
+<p align="center">
+  <img src="./assets/assinatura.jpeg" alt="Imagem Assinatura" width="300" />
+</p>
+
+
 ## Tecnologias Utilizadas
 
 - **React Native** com Expo
