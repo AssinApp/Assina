@@ -1,4 +1,4 @@
-package com.watarumaeda.react_native_boilerplate.dev
+package com.watarumaeda.assinapp.dev
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

@@ -6,7 +6,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     slug: 'AssinApp',
     name:  'AssinApp',
     owner: "assinapp",
-    icon: "./src/assets/images/favicon.png",
+    icon: "assets/favicon.png",
     ios: {
       ...config.ios,
       bundleIdentifier: process.env.EXPO_PUBLIC_IOS_BUNDLE_IDENTIFIER,
@@ -17,7 +17,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       package: process.env.EXPO_PUBLIC_IOS_ANDROID_PACKAGE,
       versionCode: 1,
       adaptiveIcon: {
-        foregroundImage: "/src/assets/images/adaptive-icon.png", // Imagem do ícone adaptativo
+        foregroundImage: "assets/adaptiveicon.png", // Imagem do ícone adaptativo
         backgroundColor: "#4230de", // Cor de fundo do ícone (ajuste conforme necessário)
       },
     },

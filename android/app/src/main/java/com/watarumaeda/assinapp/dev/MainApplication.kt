@@ -1,4 +1,4 @@
-package com.watarumaeda.react_native_boilerplate.dev
+package com.watarumaeda.assinapp.dev
 
 import android.app.Application
 import android.content.res.Configuration

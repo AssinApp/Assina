@@ -21,7 +21,7 @@ extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
   }
 }
 
-rootProject.name = 'DEV - React Native Boilerplate'
+rootProject.name = 'AssinApp'
 
 dependencyResolutionManagement {
   versionCatalogs {
