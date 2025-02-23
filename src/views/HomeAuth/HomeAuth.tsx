@@ -51,15 +51,29 @@ export default function HomeAuth({ handleLogout }) {
   useEffect(() => {
     const fetchUser = async () => {
       const token = await AsyncStorage.getItem('token');
-      if (token) {
+
+      // Se não houver token, faz logout imediatamente
+      if (!token) {
+        handleLogout();
+        return;
+      }
+
+      try {
         const response = await fetch(`${API_BASE_URL}/users/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
-        if (response.ok) {
+
+        if (response.ok && data.name) {
           setUserName(data.name);
-          await loadSignedDocuments(); // Carrega os documentos assinados do usuário atual
+          await loadSignedDocuments();
+        } else {
+          // Se a resposta não for válida ou se o nome for o padrão inicial, faz logout
+          handleLogout();
         }
+      } catch (error) {
+        console.error('Erro ao buscar usuário:', error);
+        handleLogout();
       }
     };
 
