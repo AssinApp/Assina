@@ -13,7 +13,7 @@ O **AssinApp** é um aplicativo móvel para assinatura digital de documentos. O 
 </p>
 
 <p align="center">
-  <img src="./assets/assinatura.jpeg" alt="Imagem Assinatura" width="300" />
+  <img src="./assets/Assinatura.jpeg" alt="Imagem Assinatura" width="300" />
 </p>
 
 
