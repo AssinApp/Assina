@@ -136,6 +136,10 @@ export default function Assinatura({ route }: AssinaturaProps) {
   const [selectedPdf, setSelectedPdf] = useState<string | null>(null);
   const [signedPdfUri, setSignedPdfUri] = useState<string | null>(null);
 
+  // página PDF
+  const [currentPage, setCurrentPage] = useState(1); // Estado para a página atual
+  const [totalPages, setTotalPages] = useState(1); // Estado para armazenar o total de páginas
+
   // Forçar re-render do <Pdf /> ao escolher/fechar novo arquivo
   const [key, setKey] = useState(0);
 
@@ -279,7 +283,7 @@ export default function Assinatura({ route }: AssinaturaProps) {
     }
   }
 
-  async function sendPdfToSign(selectedPdf, pdfX, pdfY) {
+  async function sendPdfToSign(selectedPdf, pdfX, pdfY, pageNumber) {
     if (!selectedPdf) {
       Alert.alert('Erro', 'Selecione um arquivo primeiro!');
       return;
@@ -316,10 +320,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
       });
       formData.append('posX', pdfX.toString()); // Enviar as coordenadas de X
       formData.append('posY', pdfY.toString()); // Enviar as coordenadas de Y
+      formData.append('pageNumber', pageNumber.toString()); // 🔥 Inclui a página corretamente
       formData.append('pageNumber', '1');
       formData.append('userId', userInfo.id);
 
-      console.log('📤 [4/6] Enviando PDF para API de assinatura...');
+      console.log(`📤 [4/6] Enviando PDF para API de assinatura (Página ${pageNumber})...`);
 
       const response = await fetch(`${API_SIGNATURE_BASE_URL}/api/pdf/signature`, {
         method: 'POST',
@@ -449,22 +454,25 @@ export default function Assinatura({ route }: AssinaturaProps) {
     const pdfX = pdfDimensions.width * fracX;
     const pdfY = pdfDimensions.height * (1 - fracY);
 
-    console.log(`📍 Coordenadas de assinatura (PDF): X=${pdfX}, Y=${pdfY}`);
+    console.log(`📍 Coordenadas de assinatura (PDF): X=${pdfX}, Y=${pdfY}, Página=${currentPage}`);
 
     try {
-      const newPdfUri = await signPdf(selectedPdf, pdfX, pdfY, `Assinado por: ${userName}`);
+      const newPdfUri = await signPdf(
+        selectedPdf,
+        pdfX,
+        pdfY,
+        `Assinado por: ${userName}`,
+        currentPage,
+      );
       setSignedPdfUri(newPdfUri);
-      Alert.alert('Sucesso', 'PDF assinado! (Veja a prévia abaixo)');
+      Alert.alert('Sucesso', `PDF assinado na página ${currentPage}! (Veja a prévia abaixo)`);
 
       if (documentTitle) {
-        await saveSignedDocument(documentTitle, userName); // Salva no AsyncStorage
+        await saveSignedDocument(documentTitle, 'signed'); // Salva no AsyncStorage
       }
 
-      // Agora, envia as coordenadas para a API de assinatura
-      await sendPdfToSign(selectedPdf, pdfX, pdfY);
-
-      // Navega de volta para a HomeAuth e força atualização
-      //navigation.navigate('HomeAuth', { refresh: true });
+      // Agora, envia as coordenadas e a página para a API de assinatura
+      await sendPdfToSign(selectedPdf, pdfX, pdfY, currentPage);
     } catch (err) {
       console.error(err);
       Alert.alert('Erro', 'Falha ao assinar PDF');
@@ -719,6 +727,11 @@ export default function Assinatura({ route }: AssinaturaProps) {
                     maxScale={1.0}
                     fitPolicy={2}
                     onError={err => console.error('Erro no PDF:', err)}
+                    onPageChanged={(page, count) => {
+                      setCurrentPage(page);
+                      setTotalPages(count);
+                      console.log(`📄 Página atual: ${page} / ${count}`);
+                    }}
                   />
                   {/* Caixa arrastável "Assinar Aqui" */}
                   <Animated.View
